@@ -63,7 +63,7 @@ export function useOverdueNotifications() {
 
         // Also add to in-app notifications
         const notification = {
-          id: `overdue-${task.id}-${Date.now()}`,
+          id: crypto.randomUUID(),
           type: 'overdue' as const,
           taskId: task.id,
           taskTitle: task.title,
@@ -80,9 +80,7 @@ export function useOverdueNotifications() {
         );
 
         if (!alreadyNotified) {
-          useTaskStore.setState((s) => ({
-            notifications: [notification, ...s.notifications],
-          }));
+          useTaskStore.getState().addNotification(notification);
         }
       });
     };
