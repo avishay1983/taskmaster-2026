@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTaskStore } from '@/lib/task-store';
 import { Workspace } from '@/lib/types';
 import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
+import shabbatIcon from '@/assets/shabbat-icon.png';
 import {
   Sidebar,
   SidebarContent,
