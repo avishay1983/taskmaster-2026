@@ -4,16 +4,28 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Plus, Search, List, Columns3 } from 'lucide-react';
+import { Bell, Plus, Search, List, Columns3, Trash2 } from 'lucide-react';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { CreateTaskModal } from './CreateTaskModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export function AppHeader() {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount } =
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces } =
     useTaskStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
+  const [showDeleteAll, setShowDeleteAll] = useState(false);
   const unreadCount = getUnreadNotificationCount();
+  const ws = activeWorkspace ? workspaces.find((w) => w.id === activeWorkspace) : null;
 
   return (
     <>
@@ -30,6 +42,16 @@ export function AppHeader() {
           <span>משימה חדשה</span>
         </Button>
 
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowDeleteAll(true)}
+          className="gap-1.5 rounded-lg font-medium hidden md:flex text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
+        >
+          <Trash2 className="h-4 w-4" />
+          <span>מחק הכל</span>
+        </Button>
+
         <div className="relative flex-1 max-w-md mx-auto">
           <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -42,6 +64,16 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Mobile: delete all icon */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 text-destructive md:hidden"
+            onClick={() => setShowDeleteAll(true)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+
           <div className="flex items-center rounded-lg border border-border p-0.5">
             <Button
               variant={viewMode === 'list' ? 'secondary' : 'ghost'}
@@ -90,6 +122,29 @@ export function AppHeader() {
       >
         <Plus className="h-6 w-6" />
       </Button>
+
+      {/* Delete All Confirmation */}
+      <AlertDialog open={showDeleteAll} onOpenChange={setShowDeleteAll}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>מחיקת כל המשימות</AlertDialogTitle>
+            <AlertDialogDescription>
+              {ws
+                ? `האם אתה בטוח שברצונך למחוק את כל המשימות ב"${ws.icon} ${ws.name}"? פעולה זו לא ניתנת לביטול.`
+                : 'האם אתה בטוח שברצונך למחוק את כל המשימות? פעולה זו לא ניתנת לביטול.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogAction
+              onClick={() => { deleteAllTasks(); setShowDeleteAll(false); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              מחק הכל
+            </AlertDialogAction>
+            <AlertDialogCancel>ביטול</AlertDialogCancel>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <CreateTaskModal open={showCreateTask} onClose={() => setShowCreateTask(false)} />
     </>
