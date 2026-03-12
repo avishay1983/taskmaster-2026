@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Task, Notification, ViewMode, TaskStatus, Workspace } from './types';
 import { initialTasks, initialNotifications, workspaces as initialWorkspaces } from './mock-data';
 
@@ -33,97 +34,109 @@ interface TaskStore {
   getUnreadNotificationCount: () => number;
 }
 
-export const useTaskStore = create<TaskStore>((set, get) => ({
-  tasks: initialTasks,
-  notifications: initialNotifications,
-  workspaces: initialWorkspaces,
-  activeWorkspace: null,
-  viewMode: 'list',
-  searchQuery: '',
+export const useTaskStore = create<TaskStore>()(
+  persist(
+    (set, get) => ({
+      tasks: initialTasks,
+      notifications: initialNotifications,
+      workspaces: initialWorkspaces,
+      activeWorkspace: null,
+      viewMode: 'list',
+      searchQuery: '',
 
-  setActiveWorkspace: (id) => set({ activeWorkspace: id }),
-  setViewMode: (mode) => set({ viewMode: mode }),
-  setSearchQuery: (query) => set({ searchQuery: query }),
+      setActiveWorkspace: (id) => set({ activeWorkspace: id }),
+      setViewMode: (mode) => set({ viewMode: mode }),
+      setSearchQuery: (query) => set({ searchQuery: query }),
 
-  addTask: (task) => set((s) => ({ tasks: [task, ...s.tasks] })),
-  updateTask: (id, updates) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
-    })),
-  deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
-  deleteAllTasks: () => {
-    const { activeWorkspace } = get();
-    set((s) => ({
-      tasks: activeWorkspace
-        ? s.tasks.filter((t) => t.workspaceId !== activeWorkspace)
-        : [],
-    }));
-  },
-  toggleComplete: (id) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) =>
-        t.id === id
-          ? { ...t, completed: !t.completed, status: !t.completed ? 'done' : 'todo' }
-          : t
-      ),
-    })),
-  updateTaskStatus: (id, status) =>
-    set((s) => ({
-      tasks: s.tasks.map((t) =>
-        t.id === id
-          ? { ...t, status, completed: status === 'done' }
-          : t
-      ),
-    })),
+      addTask: (task) => set((s) => ({ tasks: [task, ...s.tasks] })),
+      updateTask: (id, updates) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
+        })),
+      deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+      deleteAllTasks: () => {
+        const { activeWorkspace } = get();
+        set((s) => ({
+          tasks: activeWorkspace
+            ? s.tasks.filter((t) => t.workspaceId !== activeWorkspace)
+            : [],
+        }));
+      },
+      toggleComplete: (id) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === id
+              ? { ...t, completed: !t.completed, status: !t.completed ? 'done' : 'todo' }
+              : t
+          ),
+        })),
+      updateTaskStatus: (id, status) =>
+        set((s) => ({
+          tasks: s.tasks.map((t) =>
+            t.id === id
+              ? { ...t, status, completed: status === 'done' }
+              : t
+          ),
+        })),
 
+      addWorkspace: (workspace) => set((s) => ({ workspaces: [...s.workspaces, workspace] })),
+      deleteWorkspace: (id) =>
+        set((s) => ({
+          workspaces: s.workspaces.filter((w) => w.id !== id),
+          tasks: s.tasks.filter((t) => t.workspaceId !== id),
+          activeWorkspace: s.activeWorkspace === id ? null : s.activeWorkspace,
+        })),
+      addMemberToWorkspace: (workspaceId, memberName) =>
+        set((s) => ({
+          workspaces: s.workspaces.map((w) =>
+            w.id === workspaceId && !w.members.includes(memberName)
+              ? { ...w, members: [...w.members, memberName] }
+              : w
+          ),
+        })),
+      removeMemberFromWorkspace: (workspaceId, memberName) =>
+        set((s) => ({
+          workspaces: s.workspaces.map((w) =>
+            w.id === workspaceId
+              ? { ...w, members: w.members.filter((m) => m !== memberName) }
+              : w
+          ),
+        })),
 
-  addWorkspace: (workspace) => set((s) => ({ workspaces: [...s.workspaces, workspace] })),
-  deleteWorkspace: (id) =>
-    set((s) => ({
-      workspaces: s.workspaces.filter((w) => w.id !== id),
-      tasks: s.tasks.filter((t) => t.workspaceId !== id),
-      activeWorkspace: s.activeWorkspace === id ? null : s.activeWorkspace,
-    })),
-  addMemberToWorkspace: (workspaceId, memberName) =>
-    set((s) => ({
-      workspaces: s.workspaces.map((w) =>
-        w.id === workspaceId && !w.members.includes(memberName)
-          ? { ...w, members: [...w.members, memberName] }
-          : w
-      ),
-    })),
-  removeMemberFromWorkspace: (workspaceId, memberName) =>
-    set((s) => ({
-      workspaces: s.workspaces.map((w) =>
-        w.id === workspaceId
-          ? { ...w, members: w.members.filter((m) => m !== memberName) }
-          : w
-      ),
-    })),
+      markNotificationRead: (id) =>
+        set((s) => ({
+          notifications: s.notifications.map((n) =>
+            n.id === id ? { ...n, read: true } : n
+          ),
+        })),
+      markAllNotificationsRead: () =>
+        set((s) => ({
+          notifications: s.notifications.map((n) => ({ ...n, read: true })),
+        })),
 
-  markNotificationRead: (id) =>
-    set((s) => ({
-      notifications: s.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-    })),
-  markAllNotificationsRead: () =>
-    set((s) => ({
-      notifications: s.notifications.map((n) => ({ ...n, read: true })),
-    })),
-
-  getFilteredTasks: () => {
-    const { tasks, activeWorkspace, searchQuery } = get();
-    return tasks
-      .filter((t) => !activeWorkspace || t.workspaceId === activeWorkspace)
-      .filter(
-        (t) =>
-          !searchQuery ||
-          t.title.includes(searchQuery) ||
-          t.description.includes(searchQuery) ||
-          t.tags.some((tag) => tag.includes(searchQuery))
-      );
-  },
-  getUnreadNotificationCount: () =>
-    get().notifications.filter((n) => !n.read).length,
-}));
+      getFilteredTasks: () => {
+        const { tasks, activeWorkspace, searchQuery } = get();
+        return tasks
+          .filter((t) => !activeWorkspace || t.workspaceId === activeWorkspace)
+          .filter(
+            (t) =>
+              !searchQuery ||
+              t.title.includes(searchQuery) ||
+              t.description.includes(searchQuery) ||
+              t.tags.some((tag) => tag.includes(searchQuery))
+          );
+      },
+      getUnreadNotificationCount: () =>
+        get().notifications.filter((n) => !n.read).length,
+    }),
+    {
+      name: 'task-manager-storage',
+      partialize: (state) => ({
+        tasks: state.tasks,
+        workspaces: state.workspaces,
+        notifications: state.notifications,
+        viewMode: state.viewMode,
+      }),
+    }
+  )
+);
