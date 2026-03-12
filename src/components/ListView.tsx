@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { RecurringTaskDialog } from './RecurringTaskDialog';
+import { SwipeableTask } from './SwipeableTask';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const priorityStyles: Record<Priority, string> = {
@@ -58,76 +59,97 @@ export function ListView() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-accent/50 group ${
-                  overdue ? 'bg-destructive/5 border border-destructive/10' : 'border border-transparent'
-                } ${task.completed ? 'opacity-60' : ''}`}
               >
-                <Checkbox
-                  checked={task.completed}
-                  onCheckedChange={() => handleToggle(task)}
-                  className="shrink-0"
-                />
+                <SwipeableTask onDelete={() => setDeleteId(task.id)}>
+                  <div
+                    className={`flex items-center gap-3 rounded-xl px-4 py-3 md:py-3 py-4 transition-colors hover:bg-accent/50 group ${
+                      overdue ? 'bg-destructive/5 border border-destructive/10' : 'border border-transparent'
+                    } ${task.completed ? 'opacity-60' : ''}`}
+                  >
+                    <Checkbox
+                      checked={task.completed}
+                      onCheckedChange={() => handleToggle(task)}
+                      className="shrink-0 h-5 w-5 md:h-4 md:w-4"
+                    />
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-sm font-medium ${
-                        task.completed ? 'line-through text-muted-foreground' : ''
-                      }`}
-                    >
-                      {task.title}
-                    </span>
-                    {overdue && <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />}
-                  </div>
-                  {task.description && (
-                    <p className="text-xs text-muted-foreground truncate mt-0.5 max-w-md">
-                      {task.description}
-                    </p>
-                  )}
-                </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-sm font-medium ${
+                            task.completed ? 'line-through text-muted-foreground' : ''
+                          }`}
+                        >
+                          {task.title}
+                        </span>
+                        {overdue && <AlertCircle className="h-3.5 w-3.5 text-destructive shrink-0" />}
+                      </div>
+                      {task.description && (
+                        <p className="text-xs text-muted-foreground truncate mt-0.5 max-w-md">
+                          {task.description}
+                        </p>
+                      )}
+                      {/* Mobile-only: show date & priority inline */}
+                      <div className="flex items-center gap-2 mt-1.5 md:hidden">
+                        <Badge variant="outline" className={`text-[10px] shrink-0 ${priorityStyles[task.priority]}`}>
+                          {priorityLabels[task.priority]}
+                        </Badge>
+                        <div className={`flex items-center gap-1 text-xs ${overdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                          <Calendar className="h-3 w-3" />
+                          {format(new Date(task.dueDate), 'dd/MM', { locale: he })}
+                        </div>
+                        {ws && (
+                          <span className="text-xs text-muted-foreground">
+                            {ws.icon}
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-                <div className="hidden sm:flex items-center gap-2">
-                  {task.tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
-                      {tag}
+                    {/* Desktop-only elements */}
+                    <div className="hidden sm:flex items-center gap-2">
+                      {task.tags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="text-[10px] px-1.5 py-0">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+
+                    <Badge variant="outline" className={`text-[10px] shrink-0 hidden md:inline-flex ${priorityStyles[task.priority]}`}>
+                      {priorityLabels[task.priority]}
                     </Badge>
-                  ))}
-                </div>
 
-                <Badge variant="outline" className={`text-[10px] shrink-0 ${priorityStyles[task.priority]}`}>
-                  {priorityLabels[task.priority]}
-                </Badge>
+                    {ws && (
+                      <span className="text-xs text-muted-foreground shrink-0 hidden md:inline">
+                        {ws.icon} {ws.name}
+                      </span>
+                    )}
 
-                {ws && (
-                  <span className="text-xs text-muted-foreground shrink-0 hidden md:inline">
-                    {ws.icon} {ws.name}
-                  </span>
-                )}
+                    {assigneeName && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 hidden lg:flex">
+                        <User className="h-3 w-3" />
+                        {assigneeName}
+                      </div>
+                    )}
 
-                {assigneeName && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 hidden lg:flex">
-                    <User className="h-3 w-3" />
-                    {assigneeName}
+                    <div className={`items-center gap-1 text-xs shrink-0 hidden md:flex ${overdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
+                      <Calendar className="h-3 w-3" />
+                      {format(new Date(task.dueDate), 'dd/MM', { locale: he })}
+                      {task.dueTime && (
+                        <>
+                          <Clock className="h-3 w-3 mr-1" />
+                          {task.dueTime}
+                        </>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => setDeleteId(task.id)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all shrink-0 hidden md:block"
+                      title="מחק משימה"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
-                )}
-
-                <div className={`flex items-center gap-1 text-xs shrink-0 ${overdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>
-                  <Calendar className="h-3 w-3" />
-                  {format(new Date(task.dueDate), 'dd/MM', { locale: he })}
-                  {task.dueTime && (
-                    <>
-                      <Clock className="h-3 w-3 mr-1" />
-                      {task.dueTime}
-                    </>
-                  )}
-                </div>
-                <button
-                  onClick={() => setDeleteId(task.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all shrink-0"
-                  title="מחק משימה"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                </SwipeableTask>
               </motion.div>
             );
           })}

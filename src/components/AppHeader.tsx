@@ -17,16 +17,17 @@ export function AppHeader() {
 
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm px-4">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm px-3 md:px-4">
         <SidebarTrigger className="shrink-0" />
 
+        {/* Desktop: inline button */}
         <Button
           size="sm"
           onClick={() => setShowCreateTask(true)}
-          className="gap-1.5 rounded-lg font-medium"
+          className="gap-1.5 rounded-lg font-medium hidden md:flex"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">משימה חדשה</span>
+          <span>משימה חדשה</span>
         </Button>
 
         <div className="relative flex-1 max-w-md mx-auto">
@@ -80,6 +81,15 @@ export function AppHeader() {
           </div>
         </div>
       </header>
+
+      {/* Mobile FAB for adding tasks */}
+      <Button
+        size="icon"
+        onClick={() => setShowCreateTask(true)}
+        className="fixed bottom-6 left-6 z-40 h-14 w-14 rounded-full shadow-lg md:hidden"
+      >
+        <Plus className="h-6 w-6" />
+      </Button>
 
       <CreateTaskModal open={showCreateTask} onClose={() => setShowCreateTask(false)} />
     </>

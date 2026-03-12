@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useTaskStore } from '@/lib/task-store';
 import { Task, TaskStatus, Priority } from '@/lib/types';
 
 import { Badge } from '@/components/ui/badge';
 import { format, isPast, isToday } from 'date-fns';
 import { he } from 'date-fns/locale';
-import { Calendar, AlertCircle, GripVertical } from 'lucide-react';
+import { Calendar, AlertCircle, GripVertical, ChevronLeft, ChevronRight } from 'lucide-react';
 import { RecurringTaskDialog } from './RecurringTaskDialog';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const columns: { id: TaskStatus; label: string; color: string }[] = [
   { id: 'todo', label: 'לביצוע', color: 'bg-secondary' },
@@ -25,6 +26,9 @@ export function KanbanView() {
   const { getFilteredTasks, updateTaskStatus, workspaces } = useTaskStore();
   const [recurringTask, setRecurringTask] = useState<Task | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [activeCol, setActiveCol] = useState(0);
+  const isMobile = useIsMobile();
+  const scrollRef = useRef<HTMLDivElement>(null);
   const tasks = getFilteredTasks();
 
   const handleDragStart = (e: React.DragEvent, taskId: string) => {
@@ -54,15 +58,68 @@ export function KanbanView() {
   const isOverdue = (task: Task) =>
     !task.completed && isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate));
 
+  const scrollToCol = (idx: number) => {
+    const clamped = Math.max(0, Math.min(columns.length - 1, idx));
+    setActiveCol(clamped);
+    if (scrollRef.current) {
+      const colWidth = scrollRef.current.scrollWidth / columns.length;
+      scrollRef.current.scrollTo({ left: colWidth * clamped, behavior: 'smooth' });
+    }
+  };
+
+  // Mobile: move task to next/prev column via long press or buttons
+  const moveTask = (taskId: string, direction: 'next' | 'prev') => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+    const currentIdx = columns.findIndex((c) => c.id === task.status);
+    const targetIdx = direction === 'next' ? currentIdx + 1 : currentIdx - 1;
+    if (targetIdx < 0 || targetIdx >= columns.length) return;
+    const targetStatus = columns[targetIdx].id;
+    if (targetStatus === 'done' && !task.completed) {
+      setRecurringTask(task);
+    }
+    updateTaskStatus(taskId, targetStatus);
+  };
+
   return (
     <>
-      <div className="flex gap-4 overflow-x-auto pb-4 h-full" dir="rtl">
-        {columns.map((col) => {
+      {/* Mobile column navigation dots */}
+      {isMobile && (
+        <div className="flex items-center justify-center gap-3 mb-3" dir="rtl">
+          {columns.map((col, idx) => (
+            <button
+              key={col.id}
+              onClick={() => scrollToCol(idx)}
+              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                activeCol === idx
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-secondary text-muted-foreground'
+              }`}
+            >
+              {col.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div
+        ref={scrollRef}
+        className="flex gap-4 overflow-x-auto pb-4 h-full snap-x snap-mandatory md:snap-none"
+        dir="rtl"
+        onScroll={(e) => {
+          if (isMobile && scrollRef.current) {
+            const colWidth = scrollRef.current.scrollWidth / columns.length;
+            const newIdx = Math.round(scrollRef.current.scrollLeft / colWidth);
+            if (newIdx !== activeCol) setActiveCol(newIdx);
+          }
+        }}
+      >
+        {columns.map((col, colIdx) => {
           const colTasks = tasks.filter((t) => t.status === col.id);
           return (
             <div
               key={col.id}
-              className="flex-1 min-w-[280px] flex flex-col"
+              className="flex-shrink-0 w-[85vw] md:w-auto md:flex-1 min-w-[280px] flex flex-col snap-center"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.id)}
             >
@@ -78,19 +135,25 @@ export function KanbanView() {
                   const ws = workspaces.find((w) => w.id === task.workspaceId);
                   const assigneeName = task.assigneeId;
                   const overdue = isOverdue(task);
+                  const canMoveNext = colIdx < columns.length - 1;
+                  const canMovePrev = colIdx > 0;
 
                   return (
                     <motion.div
                       key={task.id}
                       layout
-                      draggable
-                      onDragStart={(e) => handleDragStart(e as any, task.id)}
-                      className={`rounded-xl border bg-card p-3 cursor-grab active:cursor-grabbing shadow-sm hover:shadow-md transition-shadow ${
-                        overdue ? 'border-destructive/30' : 'border-border'
-                      } ${draggedId === task.id ? 'opacity-50' : ''}`}
+                      draggable={!isMobile}
+                      onDragStart={(e) => !isMobile && handleDragStart(e as any, task.id)}
+                      className={`rounded-xl border bg-card p-3 shadow-sm transition-shadow ${
+                        isMobile ? 'active:shadow-md' : 'cursor-grab active:cursor-grabbing hover:shadow-md'
+                      } ${overdue ? 'border-destructive/30' : 'border-border'} ${
+                        draggedId === task.id ? 'opacity-50' : ''
+                      }`}
                     >
                       <div className="flex items-start gap-2">
-                        <GripVertical className="h-4 w-4 text-muted-foreground/40 mt-0.5 shrink-0" />
+                        {!isMobile && (
+                          <GripVertical className="h-4 w-4 text-muted-foreground/40 mt-0.5 shrink-0" />
+                        )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <div className={`h-2 w-2 rounded-full shrink-0 ${priorityDot[task.priority]}`} />
@@ -132,6 +195,30 @@ export function KanbanView() {
                                   {tag}
                                 </Badge>
                               ))}
+                            </div>
+                          )}
+
+                          {/* Mobile: move buttons */}
+                          {isMobile && (
+                            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border">
+                              {canMovePrev && (
+                                <button
+                                  onClick={() => moveTask(task.id, 'prev')}
+                                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-md bg-secondary transition-colors"
+                                >
+                                  <ChevronRight className="h-3 w-3" />
+                                  {columns[colIdx - 1].label}
+                                </button>
+                              )}
+                              {canMoveNext && (
+                                <button
+                                  onClick={() => moveTask(task.id, 'next')}
+                                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded-md bg-secondary transition-colors mr-auto"
+                                >
+                                  {columns[colIdx + 1].label}
+                                  <ChevronLeft className="h-3 w-3" />
+                                </button>
+                              )}
                             </div>
                           )}
                         </div>
