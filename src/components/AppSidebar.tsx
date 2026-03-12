@@ -76,7 +76,7 @@ export function AppSidebar() {
 
   return (
     <>
-      <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <Sidebar side="right" collapsible="icon" className="border-l border-sidebar-border">
         <SidebarContent className="pt-4">
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
