@@ -139,7 +139,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
           <DialogTitle className="text-lg">משימה חדשה</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 mt-2">
+        <div className="space-y-4 mt-2 max-h-[70vh] overflow-y-auto px-1">
           <Input
             placeholder="שם המשימה"
             value={title}
