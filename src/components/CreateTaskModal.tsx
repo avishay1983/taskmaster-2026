@@ -100,7 +100,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
     }
 
     const task: Task = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       title,
       description,
       workspaceId,

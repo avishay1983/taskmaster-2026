@@ -65,7 +65,7 @@ export function AppSidebar() {
   const handleAdd = () => {
     if (!newName.trim()) return;
     const ws: Workspace = {
-      id: `ws_${Date.now()}`,
+      id: crypto.randomUUID(),
       name: newName.trim(),
       icon: newIcon,
       color: `hsl(${Math.floor(Math.random() * 360)}, 70%, 50%)`,

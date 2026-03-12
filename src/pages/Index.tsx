@@ -9,13 +9,13 @@ import { PullToRefresh } from '@/components/PullToRefresh';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { viewMode, activeWorkspace, workspaces } = useTaskStore();
+  const { viewMode, activeWorkspace, workspaces, isLoading, loadFromDB } = useTaskStore();
   const ws = activeWorkspace ? workspaces.find((w) => w.id === activeWorkspace) : null;
 
   const handleRefresh = useCallback(async () => {
-    await new Promise((r) => setTimeout(r, 400));
+    await loadFromDB();
     toast.success('המשימות עודכנו');
-  }, []);
+  }, [loadFromDB]);
 
   return (
     <SidebarProvider>

@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          task_id: string
+          task_title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          task_id: string
+          task_title: string
+          type?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          task_id?: string
+          task_title?: string
+          type?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          assignee_id: string
+          completed: boolean
+          created_at: string
+          description: string
+          due_date: string
+          due_day: number | null
+          due_time: string | null
+          id: string
+          priority: string
+          reminder_before: string | null
+          status: string
+          tags: string[]
+          title: string
+          workspace_id: string
+        }
+        Insert: {
+          assignee_id?: string
+          completed?: boolean
+          created_at?: string
+          description?: string
+          due_date?: string
+          due_day?: number | null
+          due_time?: string | null
+          id?: string
+          priority?: string
+          reminder_before?: string | null
+          status?: string
+          tags?: string[]
+          title: string
+          workspace_id: string
+        }
+        Update: {
+          assignee_id?: string
+          completed?: boolean
+          created_at?: string
+          description?: string
+          due_date?: string
+          due_day?: number | null
+          due_time?: string | null
+          id?: string
+          priority?: string
+          reminder_before?: string | null
+          status?: string
+          tags?: string[]
+          title?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspaces: {
+        Row: {
+          color: string
+          created_at: string
+          icon: string
+          id: string
+          members: string[]
+          name: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          members?: string[]
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          members?: string[]
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
