@@ -34,7 +34,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { LayoutDashboard, Plus, Trash2, Users } from 'lucide-react';
 
-const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍', '🕯️'];
+const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍', 'shabbat'];
+
+const SPECIAL_ICONS: Record<string, string> = {
+  shabbat: shabbatIcon,
+};
+
+function IconDisplay({ icon, className = '' }: { icon: string; className?: string }) {
+  if (SPECIAL_ICONS[icon]) {
+    return <img src={SPECIAL_ICONS[icon]} alt={icon} className={`inline-block ${className}`} style={{ width: '1.2em', height: '1.2em' }} />;
+  }
+  return <span className={className}>{icon}</span>;
+}
 
 export function AppSidebar() {
   const { activeWorkspace, setActiveWorkspace, tasks, workspaces, addWorkspace, deleteWorkspace } = useTaskStore();
