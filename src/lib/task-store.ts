@@ -17,6 +17,7 @@ interface TaskStore {
   addTask: (task: Task) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
+  deleteAllTasks: () => void;
   toggleComplete: (id: string) => void;
   updateTaskStatus: (id: string, status: TaskStatus) => void;
   
@@ -50,6 +51,14 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
       tasks: s.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
     })),
   deleteTask: (id) => set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
+  deleteAllTasks: () => {
+    const { activeWorkspace } = get();
+    set((s) => ({
+      tasks: activeWorkspace
+        ? s.tasks.filter((t) => t.workspaceId !== activeWorkspace)
+        : [],
+    }));
+  },
   toggleComplete: (id) =>
     set((s) => ({
       tasks: s.tasks.map((t) =>
