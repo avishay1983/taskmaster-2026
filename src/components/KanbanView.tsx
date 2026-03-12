@@ -171,7 +171,7 @@ export function KanbanView() {
                           title="מחק משימה"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
-                        )}
+                        </button>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5">
                             <div className={`h-2 w-2 rounded-full shrink-0 ${priorityDot[task.priority]}`} />
