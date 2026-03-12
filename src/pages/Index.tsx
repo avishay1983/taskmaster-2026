@@ -37,6 +37,7 @@ const Index = () => {
             </PullToRefresh>
           </main>
         </div>
+        <AppSidebar />
       </div>
     </SidebarProvider>
   );
