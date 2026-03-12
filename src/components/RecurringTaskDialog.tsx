@@ -27,7 +27,7 @@ export function RecurringTaskDialog({ task, onClose }: Props) {
   const scheduleAgain = (newDate: Date) => {
     const newTask: Task = {
       ...task,
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       dueDate: format(newDate, 'yyyy-MM-dd'),
       completed: false,
       status: 'todo',
