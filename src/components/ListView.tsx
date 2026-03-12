@@ -28,8 +28,9 @@ const priorityStyles: Record<Priority, string> = {
 const priorityLabels: Record<Priority, string> = { high: 'גבוה', medium: 'בינוני', low: 'נמוך' };
 
 export function ListView() {
-  const { getFilteredTasks, toggleComplete, workspaces } = useTaskStore();
+  const { getFilteredTasks, toggleComplete, deleteTask, workspaces } = useTaskStore();
   const [recurringTask, setRecurringTask] = useState<Task | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const tasks = getFilteredTasks().sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 
   const handleToggle = (task: Task) => {
