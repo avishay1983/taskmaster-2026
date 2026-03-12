@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { LayoutDashboard, Plus, Trash2, Users } from 'lucide-react';
 
-const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍'];
+const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍', '🕯️'];
 
 export function AppSidebar() {
   const { activeWorkspace, setActiveWorkspace, tasks, workspaces, addWorkspace, deleteWorkspace } = useTaskStore();
