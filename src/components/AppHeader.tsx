@@ -35,7 +35,7 @@ function WorkspaceIcon({ icon }: { icon: string }) {
 }
 
 export function AppHeader() {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces, setActiveWorkspace } =
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces, setActiveWorkspace, currentUser, logout } =
     useTaskStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
