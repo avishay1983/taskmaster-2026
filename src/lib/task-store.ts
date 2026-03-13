@@ -109,7 +109,11 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       supabase.from('workspaces').select('*').order('created_at', { ascending: true }),
       supabase.from('notifications').select('*').order('created_at', { ascending: false }),
     ]);
-    const loadedWorkspaces = (workspacesRes.data || []).map(dbToWorkspace);
+    const allWorkspaces = (workspacesRes.data || []).map(dbToWorkspace);
+    const currentUser = get().currentUser;
+    const loadedWorkspaces = currentUser
+      ? allWorkspaces.filter(w => w.members.includes(currentUser))
+      : allWorkspaces;
     const currentActive = get().activeWorkspace;
     const stillExists = currentActive && loadedWorkspaces.some(w => w.id === currentActive);
     set({
