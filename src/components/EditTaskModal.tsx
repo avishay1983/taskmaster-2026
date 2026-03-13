@@ -48,12 +48,19 @@ const DAY_NAMES = [
 
 type DateMode = 'date' | 'day';
 
+function toLocalDateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 function getNextDayDate(dayOfWeek: number): string {
   const today = new Date();
   const todayDay = today.getDay();
-  if (todayDay === dayOfWeek) return today.toISOString().split('T')[0];
+  if (todayDay === dayOfWeek) return toLocalDateString(today);
   const next = nextDay(today, dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6);
-  return next.toISOString().split('T')[0];
+  return toLocalDateString(next);
 }
 
 export function EditTaskModal({ task, onClose }: Props) {
