@@ -115,7 +115,7 @@ export function KanbanView() {
 
       <div
         ref={scrollRef}
-        className="flex gap-4 overflow-x-auto pb-4 h-full snap-x snap-mandatory md:snap-none"
+        className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:snap-none"
         dir="rtl"
         onScroll={(e) => {
           if (isMobile && scrollRef.current) {
