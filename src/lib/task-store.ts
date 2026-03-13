@@ -13,6 +13,8 @@ interface TaskStore {
   currentUser: string | null;
 
   loadFromDB: () => Promise<void>;
+  setCurrentUser: (name: string) => void;
+  logout: () => void;
 
   setActiveWorkspace: (id: string | null) => void;
   setViewMode: (mode: ViewMode) => void;
