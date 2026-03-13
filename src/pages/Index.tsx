@@ -19,11 +19,11 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="h-screen flex w-full overflow-hidden">
         <AppSidebar />
-        <SidebarInset>
+        <SidebarInset className="flex flex-col h-screen overflow-hidden">
           <AppHeader />
-          <main className="flex-1 p-4 md:p-6 overflow-auto">
+          <main className="flex-1 p-4 md:p-6 overflow-y-auto">
             <PullToRefresh onRefresh={handleRefresh}>
               <div className="mb-6" dir="rtl">
                 <h1 className="text-xl font-bold">
