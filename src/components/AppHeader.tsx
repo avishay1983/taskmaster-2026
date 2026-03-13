@@ -70,16 +70,6 @@ export function AppHeader() {
                   <span>{w.name}</span>
                 </DropdownMenuItem>
               ))}
-
-              {currentUser && (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="gap-2 text-destructive focus:text-destructive">
-                    <LogOut className="h-4 w-4" />
-                    <span>יציאה</span>
-                  </DropdownMenuItem>
-                </>
-              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
