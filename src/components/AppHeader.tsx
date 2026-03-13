@@ -59,7 +59,7 @@ export function AppHeader() {
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="min-w-[180px]">
+            <DropdownMenuContent align="start" className="min-w-[180px]" dir="rtl">
               {workspaces.map((w) => (
                 <DropdownMenuItem
                   key={w.id}
@@ -70,6 +70,16 @@ export function AppHeader() {
                   <span>{w.name}</span>
                 </DropdownMenuItem>
               ))}
+
+              {currentUser && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="gap-2 text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    <span>יציאה</span>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
