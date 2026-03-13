@@ -144,7 +144,7 @@ export function KanbanView() {
               <div className="flex-1 space-y-2">
                 {colTasks.map((task) => {
                   const ws = workspaces.find((w) => w.id === task.workspaceId);
-                  const assigneeName = task.assigneeId;
+                  const assigneeNames = task.assigneeIds;
                   const overdue = isOverdue(task);
                   const canMoveNext = colIdx < columns.length - 1;
                   const canMovePrev = colIdx > 0;
