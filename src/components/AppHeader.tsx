@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import shabbatIcon from '@/assets/shabbat-icon.png';
@@ -69,6 +70,16 @@ export function AppHeader() {
                   <span>{w.name}</span>
                 </DropdownMenuItem>
               ))}
+
+              {currentUser && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="gap-2 text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4" />
+                    <span>יציאה</span>
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -153,17 +164,6 @@ export function AppHeader() {
             )}
           </div>
 
-          {currentUser && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={logout}
-              className="h-9 w-9 text-muted-foreground hover:text-destructive"
-              title={`התנתק (${currentUser})`}
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </header>
 
