@@ -100,7 +100,7 @@ export function ListView() {
   const [editTask, setEditTask] = useState<Task | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const tasks = getFilteredTasks().sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
-  const grouped = groupTasksByDate(tasks);
+  const sections = groupTasksByWeek(tasks);
 
   const handleToggle = (task: Task) => {
     if (!task.completed) {
@@ -111,21 +111,41 @@ export function ListView() {
 
   const isOverdue = (task: Task) => !task.completed && isPast(new Date(task.dueDate)) && !isToday(new Date(task.dueDate));
 
+  const sectionStyles: Record<string, { bg: string; border: string; text: string }> = {
+    'overdue': { bg: 'bg-destructive/5', border: 'border-destructive/30', text: 'text-destructive' },
+    'this-week': { bg: 'bg-primary/5', border: 'border-primary/30', text: 'text-primary' },
+    'future': { bg: 'bg-muted/50', border: 'border-border', text: 'text-muted-foreground' },
+  };
+
   return (
     <>
-      <div className="space-y-4" dir="rtl">
-        {grouped.map(({ label, dateKey, tasks: dateTasks }) => {
-          const hasOverdue = dateTasks.some(isOverdue);
+      <div className="space-y-6" dir="rtl">
+        {sections.map((section) => {
+          const style = sectionStyles[section.sectionType];
           return (
-            <div key={dateKey}>
-              <div className={`sticky top-0 z-10 flex items-center gap-2 py-2 px-1 mb-1 backdrop-blur-sm bg-background/80 border-b ${hasOverdue ? 'border-destructive/30' : 'border-border/50'}`}>
-                <span className={`text-sm font-semibold ${hasOverdue ? 'text-destructive' : 'text-foreground'}`}>
-                  {label}
+            <div key={section.sectionType}>
+              <div className={`flex items-center gap-2 py-2.5 px-3 mb-3 rounded-lg ${style.bg} border ${style.border}`}>
+                <span className={`text-sm font-bold ${style.text}`}>
+                  {section.sectionLabel}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  ({dateTasks.length})
+                  ({section.dateGroups.reduce((sum, g) => sum + g.tasks.length, 0)})
                 </span>
               </div>
+
+              <div className="space-y-3 pr-1">
+                {section.dateGroups.map(({ label, dateKey, tasks: dateTasks }) => {
+                  const hasOverdue = dateTasks.some(isOverdue);
+                  return (
+                    <div key={dateKey}>
+                      <div className={`sticky top-0 z-10 flex items-center gap-2 py-1.5 px-1 mb-1 backdrop-blur-sm bg-background/80 border-b ${hasOverdue ? 'border-destructive/30' : 'border-border/50'}`}>
+                        <span className={`text-xs font-semibold ${hasOverdue ? 'text-destructive' : 'text-foreground'}`}>
+                          {label}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          ({dateTasks.length})
+                        </span>
+                      </div>
               <div className="space-y-1">
                 <AnimatePresence>
                   {dateTasks.map((task) => {
