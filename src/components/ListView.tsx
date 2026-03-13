@@ -104,11 +104,13 @@ export function ListView() {
                               overdue ? 'bg-destructive/5 border border-destructive/10' : 'border border-transparent'
                             } ${task.completed ? 'opacity-60' : ''}`}
                           >
-                            <Checkbox
-                              checked={task.completed}
-                              onCheckedChange={() => handleToggle(task)}
-                              className="shrink-0 h-5 w-5 md:h-4 md:w-4"
-                            />
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={task.completed}
+                                onCheckedChange={() => handleToggle(task)}
+                                className="shrink-0 h-5 w-5 md:h-4 md:w-4"
+                              />
+                            </div>
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
