@@ -25,15 +25,21 @@ const Index = () => {
           <AppHeader />
           <main className="flex-1 min-h-0 overflow-y-auto scroll-smooth-touch p-4 md:p-6">
             <PullToRefresh onRefresh={handleRefresh}>
-              <div className="mb-6" dir="rtl">
-                <h1 className="text-xl font-bold">
-                  {ws ? `${ws.icon} ${ws.name}` : '📋 כל המשימות'}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  ניהול וארגון המשימות שלך
-                </p>
-              </div>
-              {viewMode === 'list' ? <ListView /> : <KanbanView />}
+              {ws ? (
+                <div className="mb-6" dir="rtl">
+                  <h1 className="text-xl font-bold">
+                    {ws.icon} {ws.name}
+                  </h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    ניהול וארגון המשימות שלך
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 text-muted-foreground" dir="rtl">
+                  <p className="text-sm">בחר מרחב עבודה מהתפריט כדי להתחיל</p>
+                </div>
+              )}
+              {ws && (viewMode === 'list' ? <ListView /> : <KanbanView />)}
             </PullToRefresh>
           </main>
         </SidebarInset>

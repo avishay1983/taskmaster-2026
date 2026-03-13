@@ -32,7 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { LayoutDashboard, Plus, Trash2, Users } from 'lucide-react';
+import { Plus, Trash2, Users } from 'lucide-react';
 
 const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍', 'shabbat'];
 
@@ -60,7 +60,6 @@ export function AppSidebar() {
 
   const getTaskCount = (wsId: string) =>
     tasks.filter((t) => t.workspaceId === wsId && !t.completed).length;
-  const totalOpen = tasks.filter((t) => !t.completed).length;
 
   const handleAdd = () => {
     if (!newName.trim()) return;
@@ -104,24 +103,6 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={() => setActiveWorkspace(null)}
-                    className={`gap-3 rounded-lg transition-colors ${
-                      activeWorkspace === null
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                        : 'hover:bg-sidebar-accent/50'
-                    }`}
-                  >
-                    <LayoutDashboard className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <div className="flex flex-1 items-center justify-between">
-                        <span>הכל</span>
-                        <span className="text-xs text-muted-foreground">{totalOpen}</span>
-                      </div>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
 
                 {workspaces.map((ws) => (
                   <SidebarMenuItem key={ws.id}>

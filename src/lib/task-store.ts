@@ -97,10 +97,14 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       supabase.from('workspaces').select('*').order('created_at', { ascending: true }),
       supabase.from('notifications').select('*').order('created_at', { ascending: false }),
     ]);
+    const loadedWorkspaces = (workspacesRes.data || []).map(dbToWorkspace);
+    const currentActive = get().activeWorkspace;
+    const needsDefault = !currentActive || !loadedWorkspaces.some(w => w.id === currentActive);
     set({
       tasks: (tasksRes.data || []).map(dbToTask),
-      workspaces: (workspacesRes.data || []).map(dbToWorkspace),
+      workspaces: loadedWorkspaces,
       notifications: (notificationsRes.data || []).map(dbToNotification),
+      activeWorkspace: needsDefault && loadedWorkspaces.length > 0 ? loadedWorkspaces[0].id : (needsDefault ? null : currentActive),
       isLoading: false,
     });
   },
@@ -220,10 +224,11 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
   },
 
   deleteWorkspace: (id) => {
+    const remaining = get().workspaces.filter((w) => w.id !== id);
     set((s) => ({
-      workspaces: s.workspaces.filter((w) => w.id !== id),
+      workspaces: remaining,
       tasks: s.tasks.filter((t) => t.workspaceId !== id),
-      activeWorkspace: s.activeWorkspace === id ? null : s.activeWorkspace,
+      activeWorkspace: s.activeWorkspace === id ? (remaining.length > 0 ? remaining[0].id : null) : s.activeWorkspace,
     }));
     supabase.from('workspaces').delete().eq('id', id).then(({ error }) => {
       if (error) console.error('Error deleting workspace:', error);
