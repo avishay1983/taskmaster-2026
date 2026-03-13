@@ -33,6 +33,8 @@ interface TaskStore {
   removeMemberFromWorkspace: (workspaceId: string, memberName: string) => void;
 
   addNotification: (notification: Notification) => void;
+  deleteNotification: (id: string) => void;
+  clearAllNotifications: () => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
 
