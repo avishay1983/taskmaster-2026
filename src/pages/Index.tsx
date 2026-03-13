@@ -6,6 +6,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { ListView } from '@/components/ListView';
 import { KanbanView } from '@/components/KanbanView';
 import { PullToRefresh } from '@/components/PullToRefresh';
+import { WorkspacePickerDialog } from '@/components/WorkspacePickerDialog';
 import { toast } from 'sonner';
 
 const Index = () => {
@@ -44,6 +45,7 @@ const Index = () => {
           </main>
         </SidebarInset>
       </div>
+      <WorkspacePickerDialog />
     </SidebarProvider>
   );
 };
