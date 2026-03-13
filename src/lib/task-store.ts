@@ -96,6 +96,8 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
   setCurrentUser: (name) => {
     localStorage.setItem('currentUser', name);
     set({ currentUser: name });
+    // Reload to filter workspaces by the new user
+    get().loadFromDB();
   },
   logout: () => {
     localStorage.removeItem('currentUser');
