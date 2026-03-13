@@ -39,7 +39,7 @@ const Index = () => {
                   <p className="text-sm">בחר מרחב עבודה מהתפריט כדי להתחיל</p>
                 </div>
               )}
-              {viewMode === 'list' ? <ListView /> : <KanbanView />}
+              {ws && (viewMode === 'list' ? <ListView /> : <KanbanView />)}
             </PullToRefresh>
           </main>
         </SidebarInset>

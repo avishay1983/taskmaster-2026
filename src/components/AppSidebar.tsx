@@ -103,24 +103,6 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={() => setActiveWorkspace(null)}
-                    className={`gap-3 rounded-lg transition-colors ${
-                      activeWorkspace === null
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                        : 'hover:bg-sidebar-accent/50'
-                    }`}
-                  >
-                    <LayoutDashboard className="h-4 w-4 shrink-0" />
-                    {!collapsed && (
-                      <div className="flex flex-1 items-center justify-between">
-                        <span>הכל</span>
-                        <span className="text-xs text-muted-foreground">{totalOpen}</span>
-                      </div>
-                    )}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
 
                 {workspaces.map((ws) => (
                   <SidebarMenuItem key={ws.id}>
