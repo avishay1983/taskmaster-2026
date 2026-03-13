@@ -77,7 +77,6 @@ export function AppSidebar() {
     };
     if (showAdd) fetchUsers();
   }, [showAdd, workspaces]);
-    tasks.filter((t) => t.workspaceId === wsId && !t.completed).length;
 
   const getTaskCount = (wsId: string) =>
     tasks.filter((t) => t.workspaceId === wsId && !t.completed).length;
