@@ -228,6 +228,30 @@ export function AppSidebar() {
                 autoFocus
               />
             </div>
+            {allUsers.length > 0 && (
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">חברים</label>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                  {allUsers.map((user) => (
+                    <label
+                      key={user}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-sm cursor-pointer transition-colors ${
+                        selectedMembers.includes(user)
+                          ? 'bg-primary/10 text-primary border border-primary/30'
+                          : 'bg-secondary hover:bg-secondary/80 border border-transparent'
+                      }`}
+                    >
+                      <Checkbox
+                        checked={selectedMembers.includes(user)}
+                        onCheckedChange={() => toggleMember(user)}
+                        className="h-3.5 w-3.5"
+                      />
+                      {user}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
             <Button onClick={handleAdd} className="w-full" disabled={!newName.trim()}>
               צור מרחב עבודה
             </Button>
