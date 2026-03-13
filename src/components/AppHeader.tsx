@@ -156,12 +156,11 @@ export function AppHeader() {
           {currentUser && (
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={logout}
-              className="gap-1.5 text-muted-foreground hover:text-foreground text-xs"
-              title="התנתק"
+              className="h-9 w-9 text-muted-foreground hover:text-destructive"
+              title={`התנתק (${currentUser})`}
             >
-              <span className="max-w-[60px] truncate">{currentUser}</span>
               <LogOut className="h-4 w-4" />
             </Button>
           )}
