@@ -59,7 +59,7 @@ export function AppHeader() {
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="min-w-[180px]" dir="rtl">
+            <DropdownMenuContent align="start" className="min-w-[180px]">
               {workspaces.map((w) => (
                 <DropdownMenuItem
                   key={w.id}
