@@ -45,6 +45,11 @@ const Index = () => {
           </main>
         </SidebarInset>
       </div>
+      <WorkspacePickerDialog />
+            </PullToRefresh>
+          </main>
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   );
 };
