@@ -157,8 +157,7 @@ export function KanbanView() {
                       layout
                       draggable={!isMobile}
                       onDragStart={(e) => !isMobile && handleDragStart(e as any, task.id)}
-                      onClick={() => setEditTask(task)}
-                      className={`rounded-xl border bg-card p-3 shadow-sm transition-shadow cursor-pointer ${
+                      className={`rounded-xl border bg-card p-3 shadow-sm transition-shadow ${
                         isMobile ? 'active:shadow-md' : 'cursor-grab active:cursor-grabbing hover:shadow-md'
                       } ${overdue ? 'border-destructive/30' : 'border-border'} ${
                         draggedId === task.id ? 'opacity-50' : ''
