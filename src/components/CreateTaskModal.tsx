@@ -79,7 +79,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
   const members = selectedWorkspace?.members || [];
 
   useEffect(() => {
-    setAssigneeId(members[0] || '');
+    setAssigneeIds([]);
   }, [workspaceId]);
 
   const handleAddTag = () => {
