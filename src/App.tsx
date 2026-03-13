@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useOverdueNotifications } from "@/hooks/useOverdueNotifications";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 import { useTaskStore } from "@/lib/task-store";
 import { LoginScreen } from "@/components/LoginScreen";
 import Index from "./pages/Index";
