@@ -27,6 +27,7 @@ function AppContent() {
   const showLogin = !isLoading && workspaces.length > 0 && !currentUser;
 
   useOverdueNotifications();
+  usePushSubscription(currentUser);
 
   if (showLogin) {
     return <LoginScreen />;
