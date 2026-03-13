@@ -345,38 +345,63 @@ serve(async (req) => {
     if (action === 'check-and-send') {
       const keys = await getVapidKeys();
 
-      // Get all incomplete tasks
-      const { data: tasks } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('completed', false);
+      const [{ data: tasks, error: tasksError }, { data: subscriptions, error: subscriptionsError }] = await Promise.all([
+        supabase
+          .from('tasks')
+          .select('id, title, due_date, due_time, reminder_before, assignee_ids')
+          .eq('completed', false),
+        supabase
+          .from('push_subscriptions')
+          .select('endpoint, p256dh, auth, user_name'),
+      ]);
+
+      if (tasksError) throw tasksError;
+      if (subscriptionsError) throw subscriptionsError;
 
       if (!tasks || tasks.length === 0) {
-        return new Response(JSON.stringify({ sent: 0 }), {
+        return new Response(JSON.stringify({ sent: 0, created: 0 }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      // Israel timezone offset (UTC+2 or UTC+3 for DST)
+      // Israel timezone (same "wall clock" comparison for due_date/due_time strings)
       const now = new Date();
       const israelNow = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Jerusalem' }));
-
-      // Check today's notifications already sent
       const todayStr = israelNow.toISOString().split('T')[0];
-      const { data: existingNotifications } = await supabase
-        .from('notifications')
-        .select('task_id')
-        .eq('type', 'overdue')
-        .gte('created_at', todayStr + 'T00:00:00+00:00');
 
-      const alreadyNotifiedTaskIds = new Set((existingNotifications || []).map((n: any) => n.task_id));
+      const { data: existingNotifications, error: notificationsError } = await supabase
+        .from('notifications')
+        .select('task_id, type')
+        .in('type', ['overdue', 'due'])
+        .gte('created_at', `${todayStr}T00:00:00+00:00`);
+
+      if (notificationsError) throw notificationsError;
+
+      const alreadyOverdueTaskIds = new Set(
+        (existingNotifications || [])
+          .filter((n: any) => n.type === 'overdue')
+          .map((n: any) => n.task_id)
+      );
+
+      const alreadyReminderTaskIds = new Set(
+        (existingNotifications || [])
+          .filter((n: any) => n.type === 'due')
+          .map((n: any) => n.task_id)
+      );
+
+      const subscriptionsByUser = new Map<string, any[]>();
+      for (const sub of subscriptions || []) {
+        const list = subscriptionsByUser.get(sub.user_name) || [];
+        list.push(sub);
+        subscriptionsByUser.set(sub.user_name, list);
+      }
 
       let sent = 0;
+      const notificationsToInsert: any[] = [];
 
       for (const task of tasks) {
-        if (alreadyNotifiedTaskIds.has(task.id)) continue;
+        if (!task.due_date) continue;
 
-        // Check if task is overdue (using Israel timezone)
         let dueDateTime: Date;
         if (task.due_time) {
           const [h, m] = task.due_time.split(':').map(Number);
@@ -385,59 +410,86 @@ serve(async (req) => {
           dueDateTime = new Date(`${task.due_date}T23:59:59`);
         }
 
-        // Compare in Israel time
-        if (dueDateTime > israelNow) continue;
+        if (Number.isNaN(dueDateTime.getTime())) continue;
 
-        // Task is overdue - send push to all assignees
+        const uniqueSubs = new Map<string, any>();
         for (const assignee of (task.assignee_ids || [])) {
-          const { data: subs } = await supabase
-            .from('push_subscriptions')
-            .select('*')
-            .eq('user_name', assignee);
+          for (const sub of subscriptionsByUser.get(assignee) || []) {
+            uniqueSubs.set(sub.endpoint, sub);
+          }
+        }
+        const assigneeSubscriptions = Array.from(uniqueSubs.values());
 
-          if (!subs) continue;
+        // Reminder-before notification (e.g. 15m / 1h)
+        const reminderMs = parseReminderToMs(task.reminder_before);
+        if (reminderMs && dueDateTime > israelNow && !alreadyReminderTaskIds.has(task.id)) {
+          const reminderAt = new Date(dueDateTime.getTime() - reminderMs);
 
-          const message = JSON.stringify({
-            title: '⚠️ משימה באיחור',
-            body: `המשימה "${task.title}" באיחור!`,
-            icon: '/pwa-192x192.png',
-            tag: `overdue-${task.id}`,
-          });
+          if (reminderAt <= israelNow) {
+            const reminderMessage = `תזכורת: "${task.title}" בעוד ${formatReminder(task.reminder_before)}`;
 
-          for (const sub of subs) {
-            try {
-              const resp = await sendWebPush(
-                sub.endpoint,
-                sub.p256dh,
-                sub.auth,
-                message,
-                keys.publicKey,
-                keys.privateKey
+            if (assigneeSubscriptions.length > 0) {
+              sent += await sendPushToSubscriptions(
+                supabase,
+                assigneeSubscriptions,
+                {
+                  title: '⏰ תזכורת למשימה',
+                  body: reminderMessage,
+                  icon: '/pwa-192x192.png',
+                  tag: `due-${task.id}-${todayStr}`,
+                },
+                keys
               );
-
-              if (resp.ok) {
-                sent++;
-              } else if (resp.status === 404 || resp.status === 410) {
-                // Subscription expired, remove it
-                await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
-              }
-            } catch (e) {
-              console.error('Push send error:', e);
             }
+
+            notificationsToInsert.push({
+              type: 'due',
+              task_id: task.id,
+              task_title: task.title,
+              message: reminderMessage,
+              read: false,
+            });
+
+            alreadyReminderTaskIds.add(task.id);
           }
         }
 
-        // Record notification to prevent duplicates
-        await supabase.from('notifications').insert({
+        // Overdue notification
+        if (dueDateTime > israelNow || alreadyOverdueTaskIds.has(task.id)) continue;
+
+        const overdueMessage = `המשימה "${task.title}" באיחור!`;
+
+        if (assigneeSubscriptions.length > 0) {
+          sent += await sendPushToSubscriptions(
+            supabase,
+            assigneeSubscriptions,
+            {
+              title: '⚠️ משימה באיחור',
+              body: overdueMessage,
+              icon: '/pwa-192x192.png',
+              tag: `overdue-${task.id}-${todayStr}`,
+            },
+            keys
+          );
+        }
+
+        notificationsToInsert.push({
           type: 'overdue',
           task_id: task.id,
           task_title: task.title,
-          message: `המשימה "${task.title}" באיחור!`,
+          message: overdueMessage,
           read: false,
         });
+
+        alreadyOverdueTaskIds.add(task.id);
       }
 
-      return new Response(JSON.stringify({ sent }), {
+      if (notificationsToInsert.length > 0) {
+        const { error: insertError } = await supabase.from('notifications').insert(notificationsToInsert);
+        if (insertError) throw insertError;
+      }
+
+      return new Response(JSON.stringify({ sent, created: notificationsToInsert.length }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
