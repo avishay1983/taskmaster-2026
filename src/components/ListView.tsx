@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { RecurringTaskDialog } from './RecurringTaskDialog';
+import { EditTaskModal } from './EditTaskModal';
 import { SwipeableTask } from './SwipeableTask';
 import { motion, AnimatePresence } from 'framer-motion';
 
