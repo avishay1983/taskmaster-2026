@@ -25,8 +25,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+const SPECIAL_ICONS: Record<string, string> = { shabbat: shabbatIcon };
+
+function WorkspaceIcon({ icon }: { icon: string }) {
+  if (SPECIAL_ICONS[icon]) {
+    return <img src={SPECIAL_ICONS[icon]} alt={icon} className="inline-block w-4 h-4" />;
+  }
+  return <span className="text-sm">{icon}</span>;
+}
+
 export function AppHeader() {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces } =
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces, setActiveWorkspace } =
     useTaskStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
