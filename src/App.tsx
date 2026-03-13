@@ -22,10 +22,12 @@ function AppContent() {
     loadFromDB();
   }, [loadFromDB]);
 
+  // Show login after data is loaded so we have member names
+  const showLogin = !isLoading && workspaces.length > 0 && !currentUser;
+
   useOverdueNotifications();
 
-  // Show login after data is loaded so we have member names
-  if (!isLoading && workspaces.length > 0 && !currentUser) {
+  if (showLogin) {
     return <LoginScreen />;
   }
 
