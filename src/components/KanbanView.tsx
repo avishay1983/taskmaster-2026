@@ -36,6 +36,7 @@ const priorityDot: Record<Priority, string> = {
 export function KanbanView() {
   const { getFilteredTasks, updateTaskStatus, deleteTask, workspaces } = useTaskStore();
   const [recurringTask, setRecurringTask] = useState<Task | null>(null);
+  const [editTask, setEditTask] = useState<Task | null>(null);
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [activeCol, setActiveCol] = useState(0);
