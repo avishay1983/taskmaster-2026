@@ -152,6 +152,19 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
+        {currentUser && (
+          <SidebarFooter className="p-2">
+            <Button
+              variant="ghost"
+              onClick={logout}
+              className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4" />
+              {!collapsed && <span>יציאה ({currentUser})</span>}
+            </Button>
+          </SidebarFooter>
+        )}
       </Sidebar>
 
       {/* Add Workspace Dialog */}
