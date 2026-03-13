@@ -164,17 +164,6 @@ export function AppHeader() {
             )}
           </div>
 
-          {currentUser && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={logout}
-              className="h-9 w-9 text-muted-foreground hover:text-destructive"
-              title={`התנתק (${currentUser})`}
-            >
-              <LogOut className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </header>
 
