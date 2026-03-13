@@ -48,16 +48,22 @@ const DAY_NAMES = [
 
 type DateMode = 'date' | 'day';
 
-/** Given a target day (0-6), return the next occurrence as ISO date string */
+function toLocalDateString(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+/** Given a target day (0-6), return the next occurrence as local date string */
 function getNextDayDate(dayOfWeek: number): string {
   const today = new Date();
   const todayDay = today.getDay();
   if (todayDay === dayOfWeek) {
-    // If today is that day, use today
-    return today.toISOString().split('T')[0];
+    return toLocalDateString(today);
   }
   const next = nextDay(today, dayOfWeek as 0 | 1 | 2 | 3 | 4 | 5 | 6);
-  return next.toISOString().split('T')[0];
+  return toLocalDateString(next);
 }
 
 export function CreateTaskModal({ open, onClose }: Props) {
