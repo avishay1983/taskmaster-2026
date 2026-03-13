@@ -98,7 +98,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
   const handleSubmit = () => {
     if (!title.trim()) return;
 
-    let finalDueDate = dueDate || new Date().toISOString().split('T')[0];
+    let finalDueDate = dueDate || toLocalDateString(new Date());
     let finalDueDay: number | undefined;
 
     if (dateMode === 'day' && dueDay !== null) {
