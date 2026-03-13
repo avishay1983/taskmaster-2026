@@ -33,7 +33,7 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
   }
 
   return (
-    <div ref={containerRef} className="relative overflow-hidden">
+    <div ref={containerRef} className="relative">
       {/* Pull indicator */}
       <motion.div
         className="absolute top-0 left-0 right-0 flex items-center justify-center z-10 pointer-events-none"
@@ -56,18 +56,7 @@ export function PullToRefresh({ children, onRefresh }: PullToRefreshProps) {
         </motion.div>
       </motion.div>
 
-      {/* Draggable content */}
-      <motion.div
-        drag="y"
-        dragDirectionLock
-        dragConstraints={{ top: 0, bottom: 150 }}
-        dragElastic={0.4}
-        onDragEnd={handleDragEnd}
-        style={{ y }}
-        className="touch-pan-x"
-      >
-        {children}
-      </motion.div>
+      {children}
     </div>
   );
 }
