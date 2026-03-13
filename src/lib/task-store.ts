@@ -33,6 +33,8 @@ interface TaskStore {
   removeMemberFromWorkspace: (workspaceId: string, memberName: string) => void;
 
   addNotification: (notification: Notification) => void;
+  deleteNotification: (id: string) => void;
+  clearAllNotifications: () => void;
   markNotificationRead: (id: string) => void;
   markAllNotificationsRead: () => void;
 
@@ -306,6 +308,25 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
     supabase.from('notifications').update({ read: true }).eq('id', id).then(({ error }) => {
       if (error) console.error('Error marking notification read:', error);
     });
+  },
+
+  deleteNotification: (id) => {
+    set((s) => ({
+      notifications: s.notifications.filter((n) => n.id !== id),
+    }));
+    supabase.from('notifications').delete().eq('id', id).then(({ error }) => {
+      if (error) console.error('Error deleting notification:', error);
+    });
+  },
+
+  clearAllNotifications: () => {
+    const ids = get().notifications.map((n) => n.id);
+    set({ notifications: [] });
+    if (ids.length > 0) {
+      supabase.from('notifications').delete().in('id', ids).then(({ error }) => {
+        if (error) console.error('Error clearing notifications:', error);
+      });
+    }
   },
 
   markAllNotificationsRead: () => {
