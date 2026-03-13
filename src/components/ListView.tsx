@@ -243,13 +243,22 @@ export function ListView() {
                                         </>
                                       )}
                                     </div>
-                                    <button
-                                      onClick={() => setDeleteId(task.id)}
-                                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all shrink-0 hidden md:block"
-                                      title="מחק משימה"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </button>
+                                    <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                      <button
+                                        onClick={() => setEditTask(task)}
+                                        className="p-1.5 rounded hover:bg-accent transition-all text-muted-foreground hover:text-foreground md:opacity-0 md:group-hover:opacity-100"
+                                        title="ערוך משימה"
+                                      >
+                                        <Pencil className="h-3.5 w-3.5" />
+                                      </button>
+                                      <button
+                                        onClick={() => setDeleteId(task.id)}
+                                        className="p-1.5 rounded hover:bg-destructive/10 hover:text-destructive transition-all text-muted-foreground md:opacity-0 md:group-hover:opacity-100"
+                                        title="מחק משימה"
+                                      >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                      </button>
+                                    </div>
                                   </div>
                                 </SwipeableTask>
                               </motion.div>
