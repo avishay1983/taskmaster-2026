@@ -102,6 +102,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
   logout: () => {
     localStorage.removeItem('currentUser');
     set({ currentUser: null, activeWorkspace: null });
+    get().loadFromDB();
   },
 
   loadFromDB: async () => {
