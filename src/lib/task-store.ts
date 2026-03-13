@@ -310,6 +310,25 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
     });
   },
 
+  deleteNotification: (id) => {
+    set((s) => ({
+      notifications: s.notifications.filter((n) => n.id !== id),
+    }));
+    supabase.from('notifications').delete().eq('id', id).then(({ error }) => {
+      if (error) console.error('Error deleting notification:', error);
+    });
+  },
+
+  clearAllNotifications: () => {
+    const ids = get().notifications.map((n) => n.id);
+    set({ notifications: [] });
+    if (ids.length > 0) {
+      supabase.from('notifications').delete().in('id', ids).then(({ error }) => {
+        if (error) console.error('Error clearing notifications:', error);
+      });
+    }
+  },
+
   markAllNotificationsRead: () => {
     set((s) => ({
       notifications: s.notifications.map((n) => ({ ...n, read: true })),
