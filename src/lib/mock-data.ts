@@ -57,7 +57,7 @@ export const initialTasks: Task[] = [
     title: 'לתאם פגישה עם רופא שיניים',
     description: 'בדיקה שנתית - לבדוק זמינות ביום שלישי או רביעי',
     workspaceId: 'personal',
-    assigneeId: 'דני כהן',
+    assigneeIds: ['דני כהן'],
     priority: 'medium',
     status: 'todo',
     tags: ['בריאות'],
