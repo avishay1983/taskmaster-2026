@@ -3,6 +3,7 @@ import { useTaskStore } from '@/lib/task-store';
 import { Workspace } from '@/lib/types';
 import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { usePushStatus, PushStatus } from '@/hooks/usePushStatus';
 import shabbatIcon from '@/assets/shabbat-icon.png';
 import {
   Sidebar,
@@ -35,7 +36,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, Users, LogOut } from 'lucide-react';
+import { Plus, Trash2, Users, LogOut, Bell, BellOff, BellRing, AlertTriangle } from 'lucide-react';
+
+const pushStatusConfig: Record<PushStatus, { icon: typeof Bell; label: string; color: string; description: string }> = {
+  loading: { icon: Bell, label: 'בודק...', color: 'text-muted-foreground', description: 'בודק מצב התראות...' },
+  subscribed: { icon: BellRing, label: 'התראות פעילות', color: 'text-emerald-600', description: 'התראות Push מופעלות ופועלות' },
+  'not-subscribed': { icon: Bell, label: 'התראות כבויות', color: 'text-amber-500', description: 'לחץ כדי להפעיל התראות Push' },
+  denied: { icon: BellOff, label: 'התראות חסומות', color: 'text-destructive', description: 'הרשאת התראות חסומה בדפדפן. יש לשנות בהגדרות הדפדפן.' },
+  unsupported: { icon: AlertTriangle, label: 'לא נתמך', color: 'text-muted-foreground', description: 'הדפדפן אינו תומך בהתראות Push' },
+};
 
 const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍', 'shabbat'];
 
