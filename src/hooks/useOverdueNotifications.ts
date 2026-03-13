@@ -2,9 +2,36 @@ import { useEffect, useRef } from 'react';
 import { useTaskStore } from '@/lib/task-store';
 import { getDeviceId } from '@/lib/device-id';
 import { supabase } from '@/integrations/supabase/client';
-import { isPast, isToday } from 'date-fns';
+import { isPast } from 'date-fns';
 
 const DAY_NAMES = ['יום ראשון', 'יום שני', 'יום שלישי', 'יום רביעי', 'יום חמישי', 'יום שישי', 'שבת'];
+
+const REMINDER_LABELS: Record<string, string> = {
+  '15m': '15 דקות',
+  '30m': '30 דקות',
+  '1h': 'שעה',
+  '2h': 'שעתיים',
+  '1d': 'יום',
+};
+
+function parseReminderToMs(reminder?: string): number | null {
+  if (!reminder) return null;
+  const match = reminder.match(/^(\d+)([mhd])$/);
+  if (!match) return null;
+
+  const value = Number(match[1]);
+  const unit = match[2];
+
+  if (unit === 'm') return value * 60 * 1000;
+  if (unit === 'h') return value * 60 * 60 * 1000;
+  if (unit === 'd') return value * 24 * 60 * 60 * 1000;
+  return null;
+}
+
+function formatReminder(reminder?: string): string {
+  if (!reminder) return 'זמן קצר';
+  return REMINDER_LABELS[reminder] ?? reminder;
+}
 
 /** Request notification permission on mount */
 export function requestNotificationPermission() {
@@ -69,6 +96,46 @@ export function useOverdueNotifications() {
           // No time set – treat end-of-day as deadline
           const d = new Date(task.dueDate + 'T23:59:59');
           dueDateTime = d;
+        }
+
+        if (Number.isNaN(dueDateTime.getTime())) return;
+
+        const now = new Date();
+
+        // Reminder before due time (e.g. 15m / 1h)
+        const reminderMs = parseReminderToMs(task.reminderBefore);
+        if (reminderMs && dueDateTime > now) {
+          const reminderAt = new Date(dueDateTime.getTime() - reminderMs);
+          const reminderKey = `${task.id}-due-${task.dueDate}-${task.dueTime ?? ''}`;
+
+          if (reminderAt <= now && !notifiedRef.current.has(reminderKey)) {
+            notifiedRef.current.add(reminderKey);
+
+            const message = `תזכורת: "${task.title}" בעוד ${formatReminder(task.reminderBefore)}`;
+            sendNotification('⏰ תזכורת למשימה', message);
+
+            const notification = {
+              id: crypto.randomUUID(),
+              type: 'due' as const,
+              taskId: task.id,
+              taskTitle: task.title,
+              message,
+              read: false,
+              createdAt: new Date().toISOString(),
+            };
+
+            const existingNotifications = useTaskStore.getState().notifications;
+            const alreadyNotified = existingNotifications.some(
+              (n) =>
+                n.taskId === task.id &&
+                n.type === 'due' &&
+                new Date(n.createdAt).toDateString() === new Date().toDateString()
+            );
+
+            if (!alreadyNotified) {
+              useTaskStore.getState().addNotification(notification);
+            }
+          }
         }
 
         if (!isPast(dueDateTime)) return;

@@ -1,7 +1,28 @@
 import { useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 const PUSH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+function getPushFunctionUrl(action: string) {
+  const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+  return `https://${projectId}.supabase.co/functions/v1/push-notifications?action=${action}`;
+}
+
+async function callPushFunction(action: string, init?: RequestInit) {
+  const response = await fetch(getPushFunctionUrl(action), {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init?.headers || {}),
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`push-notifications (${action}) failed: ${response.status} ${text}`);
+  }
+
+  return response;
+}
 
 /**
  * Subscribes the current user to Web Push notifications.
@@ -19,24 +40,24 @@ export function usePushSubscription(currentUser: string | null) {
 
     async function subscribe() {
       try {
-        // Wait for service worker to be ready
-        const registration = await navigator.serviceWorker.ready;
+        // Ensure a service worker is registered before waiting on ready
+        let registration = await navigator.serviceWorker.getRegistration();
+        if (!registration) {
+          registration = await navigator.serviceWorker.register('/sw.js');
+        }
+
+        await navigator.serviceWorker.ready;
 
         // Check if already subscribed
         const existingSub = await registration.pushManager.getSubscription();
         if (existingSub) {
-          // Already subscribed, just save to DB
-          await saveSubscription(existingSub, currentUser!);
+          await saveSubscription(existingSub, currentUser);
           subscribedRef.current = true;
           return;
         }
 
-        // Get VAPID public key from edge function
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        const resp = await fetch(
-          `https://${projectId}.supabase.co/functions/v1/push-notifications?action=vapid-public-key`
-        );
-        if (!resp.ok) throw new Error('Failed to get VAPID key');
+        // Get VAPID public key from backend function
+        const resp = await callPushFunction('vapid-public-key');
         const { publicKey } = await resp.json();
 
         if (cancelled) return;
@@ -52,7 +73,7 @@ export function usePushSubscription(currentUser: string | null) {
           applicationServerKey: appServerKey.buffer as ArrayBuffer,
         });
 
-        await saveSubscription(subscription, currentUser!);
+        await saveSubscription(subscription, currentUser);
         subscribedRef.current = true;
       } catch (err) {
         console.error('Push subscription error:', err);
@@ -60,31 +81,25 @@ export function usePushSubscription(currentUser: string | null) {
     }
 
     async function saveSubscription(subscription: PushSubscription, userName: string) {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       try {
-        await fetch(
-          `https://${projectId}.supabase.co/functions/v1/push-notifications?action=subscribe`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              subscription: subscription.toJSON(),
-              userName,
-            }),
-          }
-        );
+        await callPushFunction('subscribe', {
+          method: 'POST',
+          body: JSON.stringify({
+            subscription: subscription.toJSON(),
+            userName,
+          }),
+        });
       } catch (err) {
         console.error('Save subscription error:', err);
       }
     }
 
     async function triggerCheck() {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
       try {
-        await fetch(
-          `https://${projectId}.supabase.co/functions/v1/push-notifications?action=check-and-send`,
-          { method: 'POST' }
-        );
+        await callPushFunction('check-and-send', {
+          method: 'POST',
+          body: JSON.stringify({}),
+        });
       } catch (err) {
         console.error('Push check error:', err);
       }
@@ -92,7 +107,7 @@ export function usePushSubscription(currentUser: string | null) {
 
     subscribe();
 
-    // Periodically trigger overdue check (ensures push gets sent even without cron)
+    // Periodically trigger due/reminder check (ensures push gets sent even without cron)
     triggerCheck();
     intervalRef.current = setInterval(triggerCheck, PUSH_CHECK_INTERVAL);
 
