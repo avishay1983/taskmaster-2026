@@ -6,6 +6,7 @@ import shabbatIcon from '@/assets/shabbat-icon.png';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -32,7 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, Users } from 'lucide-react';
+import { Plus, Trash2, Users, LogOut } from 'lucide-react';
 
 const EMOJI_OPTIONS = ['📁', '🎯', '💡', '🔥', '⭐', '🏠', '💼', '👤', '📚', '🎨', '🛠️', '🌍', 'shabbat'];
 
@@ -48,7 +49,7 @@ function IconDisplay({ icon, className = '' }: { icon: string; className?: strin
 }
 
 export function AppSidebar() {
-  const { activeWorkspace, setActiveWorkspace, tasks, workspaces, addWorkspace, deleteWorkspace } = useTaskStore();
+  const { activeWorkspace, setActiveWorkspace, tasks, workspaces, addWorkspace, deleteWorkspace, currentUser, logout } = useTaskStore();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
@@ -151,6 +152,19 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
+
+        {currentUser && (
+          <SidebarFooter className="p-2">
+            <Button
+              variant="ghost"
+              onClick={logout}
+              className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="h-4 w-4" />
+              {!collapsed && <span>יציאה ({currentUser})</span>}
+            </Button>
+          </SidebarFooter>
+        )}
       </Sidebar>
 
       {/* Add Workspace Dialog */}
