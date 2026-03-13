@@ -47,7 +47,7 @@ function dbToTask(row: any): Task {
     title: row.title,
     description: row.description,
     workspaceId: row.workspace_id,
-    assigneeId: row.assignee_id,
+    assigneeIds: row.assignee_ids || [],
     priority: row.priority,
     status: row.status,
     tags: row.tags || [],
@@ -132,7 +132,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       title: task.title,
       description: task.description,
       workspace_id: task.workspaceId,
-      assignee_id: task.assigneeId,
+      assignee_ids: task.assigneeIds,
       priority: task.priority,
       status: task.status,
       tags: task.tags,
@@ -155,7 +155,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
     if (updates.title !== undefined) dbUpdates.title = updates.title;
     if (updates.description !== undefined) dbUpdates.description = updates.description;
     if (updates.workspaceId !== undefined) dbUpdates.workspace_id = updates.workspaceId;
-    if (updates.assigneeId !== undefined) dbUpdates.assignee_id = updates.assigneeId;
+    if (updates.assigneeIds !== undefined) dbUpdates.assignee_ids = updates.assigneeIds;
     if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.tags !== undefined) dbUpdates.tags = updates.tags;

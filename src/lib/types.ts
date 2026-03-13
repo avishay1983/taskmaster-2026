@@ -22,7 +22,7 @@ export interface Task {
   title: string;
   description: string;
   workspaceId: string;
-  assigneeId: string;
+  assigneeIds: string[];
   priority: Priority;
   status: TaskStatus;
   tags: string[];

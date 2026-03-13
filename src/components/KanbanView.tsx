@@ -144,7 +144,7 @@ export function KanbanView() {
               <div className="flex-1 space-y-2">
                 {colTasks.map((task) => {
                   const ws = workspaces.find((w) => w.id === task.workspaceId);
-                  const assigneeName = task.assigneeId;
+                  const assigneeNames = task.assigneeIds;
                   const overdue = isOverdue(task);
                   const canMoveNext = colIdx < columns.length - 1;
                   const canMovePrev = colIdx > 0;
@@ -199,9 +199,9 @@ export function KanbanView() {
                               </span>
                             )}
 
-                            {assigneeName && (
+                            {assigneeNames.length > 0 && (
                               <span className="text-xs text-muted-foreground mr-auto">
-                                {assigneeName.split(' ')[0]}
+                                {assigneeNames.map(n => n.split(' ')[0]).join(', ')}
                               </span>
                             )}
                           </div>

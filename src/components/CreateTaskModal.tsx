@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTaskStore } from '@/lib/task-store';
 import { Task, Priority } from '@/lib/types';
 import { nextDay, format } from 'date-fns';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { X } from 'lucide-react';
 
 interface Props {
@@ -64,7 +65,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [workspaceId, setWorkspaceId] = useState(workspaces[0]?.id || '');
-  const [assigneeId, setAssigneeId] = useState('');
+  const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const [priority, setPriority] = useState<Priority>('medium');
   const [dateMode, setDateMode] = useState<DateMode>('day');
   const [dueDate, setDueDate] = useState('');
@@ -78,7 +79,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
   const members = selectedWorkspace?.members || [];
 
   useEffect(() => {
-    setAssigneeId(members[0] || '');
+    setAssigneeIds([]);
   }, [workspaceId]);
 
   const handleAddTag = () => {
@@ -104,7 +105,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
       title,
       description,
       workspaceId,
-      assigneeId,
+      assigneeIds,
       priority,
       status: 'todo',
       tags,
@@ -169,16 +170,23 @@ export function CreateTaskModal({ open, onClose }: Props) {
               </Select>
             </div>
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">אחראי</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">אחראים</label>
               {members.length > 0 ? (
-                <Select value={assigneeId} onValueChange={setAssigneeId}>
-                  <SelectTrigger className="h-9"><SelectValue placeholder="בחר אחראי" /></SelectTrigger>
-                  <SelectContent>
-                    {members.map((name) => (
-                      <SelectItem key={name} value={name}>{name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex flex-wrap gap-2">
+                  {members.map((name) => (
+                    <label key={name} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={assigneeIds.includes(name)}
+                        onCheckedChange={(checked) => {
+                          setAssigneeIds(prev =>
+                            checked ? [...prev, name] : prev.filter(n => n !== name)
+                          );
+                        }}
+                      />
+                      {name}
+                    </label>
+                  ))}
+                </div>
               ) : (
                 <p className="text-xs text-muted-foreground mt-2">אין חברים במרחב זה.</p>
               )}

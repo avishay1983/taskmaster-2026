@@ -84,7 +84,7 @@ export function ListView() {
                 <AnimatePresence>
                   {dateTasks.map((task) => {
                     const ws = workspaces.find((w) => w.id === task.workspaceId);
-                    const assigneeName = task.assigneeId;
+                    const assigneeNames = task.assigneeIds;
                     const overdue = isOverdue(task);
 
                     return (
@@ -159,10 +159,10 @@ export function ListView() {
                               </span>
                             )}
 
-                            {assigneeName && (
+                            {assigneeNames.length > 0 && (
                               <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0 hidden lg:flex">
                                 <User className="h-3 w-3" />
-                                {assigneeName}
+                                {assigneeNames.join(', ')}
                               </div>
                             )}
 
