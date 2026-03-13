@@ -4,7 +4,14 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Plus, Search, List, Columns3, Trash2 } from 'lucide-react';
+import { Bell, Plus, Search, List, Columns3, Trash2, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import shabbatIcon from '@/assets/shabbat-icon.png';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { CreateTaskModal } from './CreateTaskModal';
 import {
@@ -18,8 +25,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+const SPECIAL_ICONS: Record<string, string> = { shabbat: shabbatIcon };
+
+function WorkspaceIcon({ icon }: { icon: string }) {
+  if (SPECIAL_ICONS[icon]) {
+    return <img src={SPECIAL_ICONS[icon]} alt={icon} className="inline-block w-4 h-4" />;
+  }
+  return <span className="text-sm">{icon}</span>;
+}
+
 export function AppHeader() {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces } =
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces, setActiveWorkspace } =
     useTaskStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
@@ -31,6 +47,31 @@ export function AppHeader() {
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm px-3 md:px-4">
         <SidebarTrigger className="shrink-0" />
+
+        {/* Workspace switcher */}
+        {ws && (
+          <DropdownMenu dir="rtl">
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg font-medium px-2">
+                <WorkspaceIcon icon={ws.icon} />
+                <span className="max-w-[100px] truncate">{ws.name}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-[180px]">
+              {workspaces.map((w) => (
+                <DropdownMenuItem
+                  key={w.id}
+                  onClick={() => setActiveWorkspace(w.id)}
+                  className={`gap-2 ${w.id === activeWorkspace ? 'bg-accent font-medium' : ''}`}
+                >
+                  <WorkspaceIcon icon={w.icon} />
+                  <span>{w.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         {/* Desktop: inline button */}
         <Button
