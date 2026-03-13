@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { RecurringTaskDialog } from './RecurringTaskDialog';
+import { EditTaskModal } from './EditTaskModal';
 import { SwipeableTask } from './SwipeableTask';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -52,6 +53,7 @@ function groupTasksByDate(tasks: Task[]): { label: string; dateKey: string; task
 export function ListView() {
   const { getFilteredTasks, toggleComplete, deleteTask, workspaces } = useTaskStore();
   const [recurringTask, setRecurringTask] = useState<Task | null>(null);
+  const [editTask, setEditTask] = useState<Task | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const tasks = getFilteredTasks().sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
   const grouped = groupTasksByDate(tasks);
@@ -97,15 +99,18 @@ export function ListView() {
                       >
                         <SwipeableTask onDelete={() => setDeleteId(task.id)}>
                           <div
-                            className={`flex items-center gap-3 rounded-xl px-4 py-3 md:py-3 py-4 transition-colors hover:bg-accent/50 group ${
+                            onClick={() => setEditTask(task)}
+                            className={`flex items-center gap-3 rounded-xl px-4 py-3 md:py-3 py-4 transition-colors hover:bg-accent/50 group cursor-pointer ${
                               overdue ? 'bg-destructive/5 border border-destructive/10' : 'border border-transparent'
                             } ${task.completed ? 'opacity-60' : ''}`}
                           >
-                            <Checkbox
-                              checked={task.completed}
-                              onCheckedChange={() => handleToggle(task)}
-                              className="shrink-0 h-5 w-5 md:h-4 md:w-4"
-                            />
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <Checkbox
+                                checked={task.completed}
+                                onCheckedChange={() => handleToggle(task)}
+                                className="shrink-0 h-5 w-5 md:h-4 md:w-4"
+                              />
+                            </div>
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
@@ -220,6 +225,7 @@ export function ListView() {
       </AlertDialog>
 
       <RecurringTaskDialog task={recurringTask} onClose={() => setRecurringTask(null)} />
+      <EditTaskModal task={editTask} onClose={() => setEditTask(null)} />
     </>
   );
 }
