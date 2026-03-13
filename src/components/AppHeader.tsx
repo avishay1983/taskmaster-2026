@@ -152,6 +152,19 @@ export function AppHeader() {
               <NotificationsDropdown onClose={() => setShowNotifications(false)} />
             )}
           </div>
+
+          {currentUser && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={logout}
+              className="gap-1 text-muted-foreground hover:text-foreground text-xs"
+              title="התנתק"
+            >
+              <span className="hidden md:inline">{currentUser}</span>
+              <LogOut className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </header>
 
