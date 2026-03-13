@@ -39,6 +39,31 @@ export function AppHeader() {
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm px-3 md:px-4">
         <SidebarTrigger className="shrink-0" />
 
+        {/* Workspace switcher */}
+        {ws && (
+          <DropdownMenu dir="rtl">
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg font-medium px-2">
+                <WorkspaceIcon icon={ws.icon} />
+                <span className="max-w-[100px] truncate">{ws.name}</span>
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-[180px]">
+              {workspaces.map((w) => (
+                <DropdownMenuItem
+                  key={w.id}
+                  onClick={() => setActiveWorkspace(w.id)}
+                  className={`gap-2 ${w.id === activeWorkspace ? 'bg-accent font-medium' : ''}`}
+                >
+                  <WorkspaceIcon icon={w.icon} />
+                  <span>{w.name}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         {/* Desktop: inline button */}
         <Button
           size="sm"
