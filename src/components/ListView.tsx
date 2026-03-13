@@ -38,16 +38,60 @@ function getDateLabel(dateStr: string): string {
   return format(date, 'EEEE, dd/MM', { locale: he });
 }
 
-function groupTasksByDate(tasks: Task[]): { label: string; dateKey: string; tasks: Task[] }[] {
-  const groups: Record<string, Task[]> = {};
+type WeekSection = {
+  sectionLabel: string;
+  sectionType: 'overdue' | 'this-week' | 'future';
+  dateGroups: { label: string; dateKey: string; tasks: Task[] }[];
+};
+
+function groupTasksByWeek(tasks: Task[]): WeekSection[] {
+  const now = new Date();
+  const weekStart = startOfWeek(now, { weekStartsOn: 0 });
+  const weekEnd = endOfWeek(now, { weekStartsOn: 0 });
+
+  const overdue: Record<string, Task[]> = {};
+  const thisWeek: Record<string, Task[]> = {};
+  const future: Record<string, Task[]> = {};
+
   for (const task of tasks) {
     const key = task.dueDate.split('T')[0];
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(task);
+    const date = parseISO(key);
+
+    if (isPast(date) && !isToday(date)) {
+      if (!overdue[key]) overdue[key] = [];
+      overdue[key].push(task);
+    } else if (isWithinInterval(date, { start: weekStart, end: weekEnd })) {
+      if (!thisWeek[key]) thisWeek[key] = [];
+      thisWeek[key].push(task);
+    } else {
+      if (!future[key]) future[key] = [];
+      future[key].push(task);
+    }
   }
-  return Object.entries(groups)
-    .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
-    .map(([dateKey, tasks]) => ({ label: getDateLabel(dateKey), dateKey, tasks }));
+
+  const toGroups = (groups: Record<string, Task[]>) =>
+    Object.entries(groups)
+      .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+      .map(([dateKey, tasks]) => ({ label: getDateLabel(dateKey), dateKey, tasks }));
+
+  const sections: WeekSection[] = [];
+
+  const overdueGroups = toGroups(overdue);
+  if (overdueGroups.length > 0) {
+    sections.push({ sectionLabel: '⚠️ באיחור', sectionType: 'overdue', dateGroups: overdueGroups });
+  }
+
+  const thisWeekGroups = toGroups(thisWeek);
+  if (thisWeekGroups.length > 0) {
+    sections.push({ sectionLabel: '📅 השבוע', sectionType: 'this-week', dateGroups: thisWeekGroups });
+  }
+
+  const futureGroups = toGroups(future);
+  if (futureGroups.length > 0) {
+    sections.push({ sectionLabel: '🔮 שבועות הבאים', sectionType: 'future', dateGroups: futureGroups });
+  }
+
+  return sections;
 }
 
 export function ListView() {
