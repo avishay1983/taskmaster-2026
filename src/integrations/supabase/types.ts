@@ -46,7 +46,7 @@ export type Database = {
       }
       tasks: {
         Row: {
-          assignee_id: string
+          assignee_ids: string[]
           completed: boolean
           created_at: string
           description: string
@@ -62,7 +62,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
-          assignee_id?: string
+          assignee_ids?: string[]
           completed?: boolean
           created_at?: string
           description?: string
@@ -78,7 +78,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
-          assignee_id?: string
+          assignee_ids?: string[]
           completed?: boolean
           created_at?: string
           description?: string
