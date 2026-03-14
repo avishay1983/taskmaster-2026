@@ -236,7 +236,7 @@ export function AppSidebar() {
             <div className="flex gap-1">
               <Button
                 variant="ghost"
-                onClick={logout}
+                onClick={() => logout()}
                 className="flex-1 justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="h-4 w-4" />
