@@ -350,6 +350,8 @@ export function AppSidebar() {
           onClose={() => setMembersWsId(null)}
         />
       )}
+
+      <PushDebugPanel open={showPushDebug} onClose={() => setShowPushDebug(false)} />
     </>
   );
 }
