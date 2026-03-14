@@ -48,19 +48,10 @@ export function usePushSubscription(currentUser: string | null) {
 
         await navigator.serviceWorker.ready;
 
-        // Always unsubscribe first to get a fresh endpoint
-        const existingSub = await registration.pushManager.getSubscription();
+        // Keep current subscription alive until we successfully get/confirm a valid one
+        let existingSub = await registration.pushManager.getSubscription();
         if (existingSub) {
-          // Save the current subscription (in case endpoint is still valid)
           await saveSubscription(existingSub, currentUser);
-          logPushAttempt(true);
-
-          // Also re-subscribe to refresh the endpoint
-          try {
-            await existingSub.unsubscribe();
-          } catch {
-            // Ignore unsubscribe errors
-          }
         }
 
         // Get VAPID public key from backend
@@ -69,16 +60,37 @@ export function usePushSubscription(currentUser: string | null) {
 
         if (cancelled) return;
 
-        // Request permission if needed
-        const permission = await Notification.requestPermission();
-        if (permission !== 'granted') return;
+        // Request permission only when needed
+        let permission = Notification.permission;
+        if (permission !== 'granted') {
+          permission = await Notification.requestPermission();
+        }
+        if (permission !== 'granted') {
+          logPushAttempt(false, 'Notification permission not granted');
+          return;
+        }
 
-        // Subscribe with fresh endpoint
         const appServerKey = urlBase64ToUint8Array(publicKey);
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: appServerKey.buffer as ArrayBuffer,
-        });
+        let subscription: PushSubscription;
+
+        try {
+          // In most browsers this returns existing subscription if compatible
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: appServerKey.buffer as ArrayBuffer,
+          });
+        } catch (err) {
+          // Fallback for browsers that require re-subscribe only on invalid state
+          const isInvalidState = err instanceof DOMException && err.name === 'InvalidStateError';
+
+          if (!existingSub || !isInvalidState) throw err;
+
+          await existingSub.unsubscribe();
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: appServerKey.buffer as ArrayBuffer,
+          });
+        }
 
         await saveSubscription(subscription, currentUser);
         logPushAttempt(true);
