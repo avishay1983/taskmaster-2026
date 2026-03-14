@@ -155,178 +155,182 @@ export function CreateTaskModal({ open, onClose }: Props) {
             onChange={(e) => setTitle(e.target.value)}
             className="text-base font-medium"
             autoFocus
+            onKeyDown={(e) => {
+              if (isBacklogMode && e.key === 'Enter' && title.trim()) {
+                e.preventDefault();
+                handleSubmit();
+              }
+            }}
           />
-          <Textarea
-            placeholder="תיאור (אופציונלי)"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={2}
-          />
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">
-                {isBacklogMode ? 'מרחב עבודה (אופציונלי)' : 'מרחב עבודה'}
-              </label>
-              <Select value={workspaceId || 'none'} onValueChange={(v) => setWorkspaceId(v === 'none' ? '' : v)}>
-                <SelectTrigger className="h-9"><SelectValue placeholder="ללא מרחב" /></SelectTrigger>
-                <SelectContent>
-                  {isBacklogMode && (
-                    <SelectItem value="none">ללא מרחב</SelectItem>
-                  )}
-                  {workspaces.map((ws) => (
-                    <SelectItem key={ws.id} value={ws.id}>
-                      {ws.icon} {ws.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">אחראים</label>
-              {members.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {members.map((name) => (
-                    <label key={name} className="flex items-center gap-1.5 text-sm cursor-pointer">
-                      <Checkbox
-                        checked={assigneeIds.includes(name)}
-                        onCheckedChange={(checked) => {
-                          setAssigneeIds(prev =>
-                            checked ? [...prev, name] : prev.filter(n => n !== name)
-                          );
-                        }}
-                      />
-                      {name}
-                    </label>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {isBacklogMode && !workspaceId ? 'בחר מרחב כדי לשייך אחראים' : 'אין חברים במרחב זה.'}
-                </p>
-              )}
-            </div>
-          </div>
+          {!isBacklogMode && (
+            <>
+              <Textarea
+                placeholder="תיאור (אופציונלי)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+              />
 
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">עדיפות</label>
-            <div className="flex gap-2">
-              {(Object.keys(priorityConfig) as Priority[]).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPriority(p)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    priority === p
-                      ? priorityConfig[p].color
-                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                  }`}
-                >
-                  {priorityConfig[p].label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Date mode toggle */}
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">מועד יעד</label>
-            <div className="flex gap-2 mb-3">
-              <button
-                onClick={() => setDateMode('date')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  dateMode === 'date'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                }`}
-              >
-                📅 תאריך מדויק
-              </button>
-              <button
-                onClick={() => setDateMode('day')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  dateMode === 'day'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                }`}
-              >
-                🔄 יום בשבוע
-              </button>
-            </div>
-
-            {dateMode === 'date' ? (
               <div className="grid grid-cols-2 gap-3">
-                <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-9" />
-                <Input type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} className="h-9" />
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">מרחב עבודה</label>
+                  <Select value={workspaceId || 'none'} onValueChange={(v) => setWorkspaceId(v === 'none' ? '' : v)}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="ללא מרחב" /></SelectTrigger>
+                    <SelectContent>
+                      {workspaces.map((ws) => (
+                        <SelectItem key={ws.id} value={ws.id}>
+                          {ws.icon} {ws.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">אחראים</label>
+                  {members.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {members.map((name) => (
+                        <label key={name} className="flex items-center gap-1.5 text-sm cursor-pointer">
+                          <Checkbox
+                            checked={assigneeIds.includes(name)}
+                            onCheckedChange={(checked) => {
+                              setAssigneeIds(prev =>
+                                checked ? [...prev, name] : prev.filter(n => n !== name)
+                              );
+                            }}
+                          />
+                          {name}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mt-2">אין חברים במרחב זה.</p>
+                  )}
+                </div>
               </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex flex-wrap gap-1.5">
-                  {DAY_NAMES.map((day) => (
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">עדיפות</label>
+                <div className="flex gap-2">
+                  {(Object.keys(priorityConfig) as Priority[]).map((p) => (
                     <button
-                      key={day.value}
-                      onClick={() => setDueDay(day.value)}
-                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                        dueDay === day.value
-                          ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background'
+                      key={p}
+                      onClick={() => setPriority(p)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                        priority === p
+                          ? priorityConfig[p].color
                           : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
                       }`}
                     >
-                      {day.label}
+                      {priorityConfig[p].label}
                     </button>
                   ))}
                 </div>
-                {dueDay !== null && (
-                  <p className="text-xs text-muted-foreground">
-                    📌 המשימה תיקבע ל-{DAY_NAMES[dueDay].label} הקרוב ({format(new Date(getNextDayDate(dueDay)), 'dd/MM/yyyy', { locale: he })})
-                    <br />
-                    ⚠️ אם לא תבוצע — תקבל התראה יומית עד ביצוע
-                  </p>
+              </div>
+
+              {/* Date mode toggle */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1.5 block">מועד יעד</label>
+                <div className="flex gap-2 mb-3">
+                  <button
+                    onClick={() => setDateMode('date')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      dateMode === 'date'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    📅 תאריך מדויק
+                  </button>
+                  <button
+                    onClick={() => setDateMode('day')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      dateMode === 'day'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                    }`}
+                  >
+                    🔄 יום בשבוע
+                  </button>
+                </div>
+
+                {dateMode === 'date' ? (
+                  <div className="grid grid-cols-2 gap-3">
+                    <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="h-9" />
+                    <Input type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} className="h-9" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-1.5">
+                      {DAY_NAMES.map((day) => (
+                        <button
+                          key={day.value}
+                          onClick={() => setDueDay(day.value)}
+                          className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                            dueDay === day.value
+                              ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background'
+                              : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      ))}
+                    </div>
+                    {dueDay !== null && (
+                      <p className="text-xs text-muted-foreground">
+                        📌 המשימה תיקבע ל-{DAY_NAMES[dueDay].label} הקרוב ({format(new Date(getNextDayDate(dueDay)), 'dd/MM/yyyy', { locale: he })})
+                        <br />
+                        ⚠️ אם לא תבוצע — תקבל התראה יומית עד ביצוע
+                      </p>
+                    )}
+                    <Input type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} className="h-9" placeholder="שעת יעד (אופציונלי)" />
+                  </div>
                 )}
-                <Input type="time" value={dueTime} onChange={(e) => setDueTime(e.target.value)} className="h-9" placeholder="שעת יעד (אופציונלי)" />
               </div>
-            )}
-          </div>
 
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">תזכורת</label>
-            <Select value={reminderBefore} onValueChange={setReminderBefore}>
-              <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {reminderOptions.map((r) => (
-                  <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-muted-foreground mb-1 block">תגיות</label>
-            <div className="flex gap-2">
-              <Input
-                placeholder="הוסף תגית"
-                value={tagInput}
-                onChange={(e) => setTagInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
-                className="h-9 flex-1"
-              />
-              <Button variant="outline" size="sm" onClick={handleAddTag} className="h-9">הוסף</Button>
-            </div>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1 text-xs">
-                    {tag}
-                    <button onClick={() => setTags(tags.filter((t) => t !== tag))}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                ))}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">תזכורת</label>
+                <Select value={reminderBefore} onValueChange={setReminderBefore}>
+                  <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {reminderOptions.map((r) => (
+                      <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            )}
-          </div>
+
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-1 block">תגיות</label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="הוסף תגית"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                    className="h-9 flex-1"
+                  />
+                  <Button variant="outline" size="sm" onClick={handleAddTag} className="h-9">הוסף</Button>
+                </div>
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {tags.map((tag) => (
+                      <Badge key={tag} variant="secondary" className="gap-1 text-xs">
+                        {tag}
+                        <button onClick={() => setTags(tags.filter((t) => t !== tag))}>
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <Button onClick={handleSubmit} className="w-full" disabled={!title.trim()}>
-            צור משימה
+            {isBacklogMode ? 'הוסף ל-Backlog' : 'צור משימה'}
           </Button>
         </div>
       </DialogContent>
