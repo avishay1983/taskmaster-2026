@@ -42,7 +42,8 @@ export function AppHeader() {
   const [showCreateTask, setShowCreateTask] = useState(false);
   const [showDeleteAll, setShowDeleteAll] = useState(false);
   const unreadCount = getUnreadNotificationCount();
-  const ws = activeWorkspace ? workspaces.find((w) => w.id === activeWorkspace) : null;
+  const ws = activeWorkspace && activeWorkspace !== 'backlog' ? workspaces.find((w) => w.id === activeWorkspace) : null;
+  const isBacklog = activeWorkspace === 'backlog';
 
   return (
     <>
