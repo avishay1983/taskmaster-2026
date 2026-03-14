@@ -419,7 +419,10 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
   getFilteredTasks: () => {
     const { tasks, activeWorkspace, searchQuery } = get();
     return tasks
-      .filter((t) => !activeWorkspace || t.workspaceId === activeWorkspace)
+      .filter((t) => {
+        if (activeWorkspace === 'backlog') return !!t.isBacklog;
+        return !activeWorkspace || t.workspaceId === activeWorkspace;
+      })
       .filter(
         (t) =>
           !searchQuery ||

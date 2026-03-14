@@ -32,6 +32,7 @@ export interface Task {
   reminderBefore?: string; // e.g. "1h", "30m", "1d"
   createdAt: string;
   completed: boolean;
+  isBacklog?: boolean;
 }
 
 export interface Notification {
