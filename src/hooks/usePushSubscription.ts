@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { logPushAttempt } from '@/components/PushDebugPanel';
 
 const PUSH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
