@@ -327,17 +327,36 @@ serve(async (req) => {
 
     if (action === 'subscribe') {
       const { subscription, userName } = await req.json();
+
+      if (!userName || !subscription?.endpoint || !subscription?.keys?.p256dh || !subscription?.keys?.auth) {
+        return new Response(JSON.stringify({ error: 'Missing subscription fields' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Keep only the latest endpoint per user to avoid stale/orphaned subscriptions
+      await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_name', userName)
+        .neq('endpoint', subscription.endpoint);
+
+      const refreshedAt = new Date().toISOString();
       const { error } = await supabase.from('push_subscriptions').upsert(
         {
           user_name: userName,
           endpoint: subscription.endpoint,
           p256dh: subscription.keys.p256dh,
           auth: subscription.keys.auth,
+          created_at: refreshedAt,
         },
         { onConflict: 'endpoint' }
       );
+
       if (error) throw error;
-      return new Response(JSON.stringify({ ok: true }), {
+
+      return new Response(JSON.stringify({ ok: true, userName, endpoint: subscription.endpoint, refreshedAt }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
