@@ -165,10 +165,15 @@ export function CreateTaskModal({ open, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">מרחב עבודה</label>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                {isBacklogMode ? 'מרחב עבודה (אופציונלי)' : 'מרחב עבודה'}
+              </label>
               <Select value={workspaceId} onValueChange={setWorkspaceId}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue placeholder="ללא מרחב" /></SelectTrigger>
                 <SelectContent>
+                  {isBacklogMode && (
+                    <SelectItem value="none">ללא מרחב</SelectItem>
+                  )}
                   {workspaces.map((ws) => (
                     <SelectItem key={ws.id} value={ws.id}>
                       {ws.icon} {ws.name}
@@ -196,7 +201,9 @@ export function CreateTaskModal({ open, onClose }: Props) {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground mt-2">אין חברים במרחב זה.</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {isBacklogMode && !workspaceId ? 'בחר מרחב כדי לשייך אחראים' : 'אין חברים במרחב זה.'}
+                </p>
               )}
             </div>
           </div>
