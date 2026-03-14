@@ -48,7 +48,7 @@ function dbToTask(row: any): Task {
     id: row.id,
     title: row.title,
     description: row.description,
-    workspaceId: row.workspace_id,
+    workspaceId: row.workspace_id || '',
     assigneeIds: row.assignee_ids || [],
     priority: row.priority,
     status: row.status,
@@ -59,6 +59,7 @@ function dbToTask(row: any): Task {
     reminderBefore: row.reminder_before || undefined,
     createdAt: row.created_at,
     completed: row.completed,
+    isBacklog: row.is_backlog || false,
   };
 }
 
