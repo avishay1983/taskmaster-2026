@@ -80,7 +80,7 @@ export function useOverdueNotifications() {
       const owner = deviceOwnerRef.current;
 
       tasks.forEach((task) => {
-        if (task.completed) return;
+        if (task.completed || !task.dueDate) return;
 
         // Only notify if this device's owner is assigned to the task
         if (owner && !task.assigneeIds.includes(owner)) return;
