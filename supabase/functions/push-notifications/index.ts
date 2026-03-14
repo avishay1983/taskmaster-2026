@@ -451,8 +451,7 @@ serve(async (req) => {
       const { data: existingNotifications, error: notificationsError } = await supabase
         .from('notifications')
         .select('task_id, type')
-        .in('type', ['overdue', 'due'])
-        .gte('created_at', `${todayStr}T00:00:00+00:00`);
+        .in('type', ['overdue', 'due']);
 
       if (notificationsError) throw notificationsError;
 
