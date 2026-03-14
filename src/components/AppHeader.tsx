@@ -26,11 +26,10 @@ function WorkspaceIcon({ icon }: { icon: string }) {
 }
 
 export function AppHeader() {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces, setActiveWorkspace, currentUser, logout } =
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, activeWorkspace, workspaces, setActiveWorkspace } =
     useTaskStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
-  const [showDeleteAll, setShowDeleteAll] = useState(false);
   const unreadCount = getUnreadNotificationCount();
   const ws = activeWorkspace && activeWorkspace !== 'backlog' ? workspaces.find((w) => w.id === activeWorkspace) : null;
   const isBacklog = activeWorkspace === 'backlog';
