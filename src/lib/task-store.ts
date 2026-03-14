@@ -226,6 +226,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
     if (updates.dueDay !== undefined) dbUpdates.due_day = updates.dueDay;
     if (updates.reminderBefore !== undefined) dbUpdates.reminder_before = updates.reminderBefore;
     if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
+    if (updates.isBacklog !== undefined) dbUpdates.is_backlog = updates.isBacklog;
     if (Object.keys(dbUpdates).length > 0) {
       supabase.from('tasks').update(dbUpdates).eq('id', id).then(({ error }) => {
         if (error) console.error('Error updating task:', error);
