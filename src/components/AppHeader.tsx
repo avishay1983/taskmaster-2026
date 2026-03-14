@@ -88,6 +88,14 @@ export function AppHeader() {
                   <span>{w.name}</span>
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => setShowDeleteAll(true)}
+                className="gap-2 text-destructive focus:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>מחק את כל המשימות</span>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -102,15 +110,6 @@ export function AppHeader() {
           <span>משימה חדשה</span>
         </Button>
 
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => setShowDeleteAll(true)}
-          className="gap-1.5 rounded-lg font-medium hidden md:flex text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20"
-        >
-          <Trash2 className="h-4 w-4" />
-          <span>מחק הכל</span>
-        </Button>
 
         <div className="relative flex-1 max-w-md mx-auto">
           <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -124,15 +123,6 @@ export function AppHeader() {
         </div>
 
         <div className="flex items-center gap-1">
-          {/* Mobile: delete all icon */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 text-destructive md:hidden"
-            onClick={() => setShowDeleteAll(true)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
 
           <div className="flex items-center rounded-lg border border-border p-0.5">
             <Button
