@@ -4,7 +4,7 @@ import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Bell, Plus, Search, List, Columns3, Trash2, ChevronDown, LogOut } from 'lucide-react';
+import { Bell, Plus, Search, List, Columns3, ChevronDown } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,16 +15,6 @@ import {
 import shabbatIcon from '@/assets/shabbat-icon.png';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { CreateTaskModal } from './CreateTaskModal';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 const SPECIAL_ICONS: Record<string, string> = { shabbat: shabbatIcon };
 
@@ -36,11 +26,10 @@ function WorkspaceIcon({ icon }: { icon: string }) {
 }
 
 export function AppHeader() {
-  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, deleteAllTasks, activeWorkspace, workspaces, setActiveWorkspace, currentUser, logout } =
+  const { viewMode, setViewMode, searchQuery, setSearchQuery, getUnreadNotificationCount, activeWorkspace, workspaces, setActiveWorkspace } =
     useTaskStore();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showCreateTask, setShowCreateTask] = useState(false);
-  const [showDeleteAll, setShowDeleteAll] = useState(false);
   const unreadCount = getUnreadNotificationCount();
   const ws = activeWorkspace && activeWorkspace !== 'backlog' ? workspaces.find((w) => w.id === activeWorkspace) : null;
   const isBacklog = activeWorkspace === 'backlog';
@@ -88,14 +77,6 @@ export function AppHeader() {
                   <span>{w.name}</span>
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setShowDeleteAll(true)}
-                className="gap-2 text-destructive focus:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>מחק את כל המשימות</span>
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -174,28 +155,6 @@ export function AppHeader() {
         <Plus className="h-6 w-6" />
       </Button>
 
-      {/* Delete All Confirmation */}
-      <AlertDialog open={showDeleteAll} onOpenChange={setShowDeleteAll}>
-        <AlertDialogContent dir="rtl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>מחיקת כל המשימות</AlertDialogTitle>
-            <AlertDialogDescription>
-              {ws
-                ? `האם אתה בטוח שברצונך למחוק את כל המשימות ב"${ws.icon} ${ws.name}"? פעולה זו לא ניתנת לביטול.`
-                : 'האם אתה בטוח שברצונך למחוק את כל המשימות? פעולה זו לא ניתנת לביטול.'}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="flex-row-reverse gap-2">
-            <AlertDialogAction
-              onClick={() => { deleteAllTasks(); setShowDeleteAll(false); }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              מחק הכל
-            </AlertDialogAction>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <CreateTaskModal open={showCreateTask} onClose={() => setShowCreateTask(false)} />
     </>
