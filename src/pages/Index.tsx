@@ -11,7 +11,8 @@ import { toast } from 'sonner';
 
 const Index = () => {
   const { viewMode, activeWorkspace, workspaces, isLoading, loadFromDB } = useTaskStore();
-  const ws = activeWorkspace ? workspaces.find((w) => w.id === activeWorkspace) : null;
+  const ws = activeWorkspace && activeWorkspace !== 'backlog' ? workspaces.find((w) => w.id === activeWorkspace) : null;
+  const isBacklog = activeWorkspace === 'backlog';
 
   const handleRefresh = useCallback(async () => {
     await loadFromDB();
