@@ -75,8 +75,10 @@ export function usePushSubscription(currentUser: string | null) {
 
         await saveSubscription(subscription, currentUser);
         subscribedRef.current = true;
+        logPushAttempt(true);
       } catch (err) {
         console.error('Push subscription error:', err);
+        logPushAttempt(false, String(err));
       }
     }
 
