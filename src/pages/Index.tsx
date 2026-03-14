@@ -27,7 +27,14 @@ const Index = () => {
           <AppHeader />
           <main className="flex-1 min-h-0 overflow-y-auto scroll-smooth-touch p-4 md:p-6">
             <PullToRefresh onRefresh={handleRefresh}>
-              {ws ? (
+              {isBacklog ? (
+                <div className="mb-6" dir="rtl">
+                  <h1 className="text-xl font-bold">📋 Backlog</h1>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    משימות לתכנון עתידי — קשר אותן למרחב עבודה כשתהיה מוכן
+                  </p>
+                </div>
+              ) : ws ? (
                 <div className="mb-6" dir="rtl">
                   <h1 className="text-xl font-bold">
                     {ws.icon} {ws.name}
@@ -41,7 +48,7 @@ const Index = () => {
                   <p className="text-sm">בחר מרחב עבודה מהתפריט כדי להתחיל</p>
                 </div>
               )}
-              {ws && (viewMode === 'list' ? <ListView /> : <KanbanView />)}
+              {(ws || isBacklog) && (viewMode === 'list' ? <ListView /> : <KanbanView />)}
             </PullToRefresh>
           </main>
         </SidebarInset>
