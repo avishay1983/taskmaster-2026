@@ -15,6 +15,22 @@ import type { Session } from "@supabase/supabase-js";
 
 const queryClient = new QueryClient();
 
+async function resolveDisplayName(userId: string, userMeta: any, email: string | undefined) {
+  // Try to fetch existing profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('display_name')
+    .eq('id', userId)
+    .single();
+
+  if (profile?.display_name) return profile.display_name;
+
+  // Profile doesn't exist (user created before trigger) - create it
+  const name = userMeta?.display_name || userMeta?.full_name || email || '';
+  await supabase.from('profiles').upsert({ id: userId, display_name: name });
+  return name;
+}
+
 function AppContent() {
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -22,37 +38,31 @@ function AppContent() {
   const currentUser = useTaskStore((s) => s.currentUser);
   const setCurrentUser = useTaskStore((s) => s.setCurrentUser);
 
-  // Listen for auth state changes
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        if (session?.user) {
-          // Fetch display_name from profiles
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('display_name')
-            .eq('id', session.user.id)
-            .single();
-          const displayName = profile?.display_name || session.user.user_metadata?.display_name || session.user.email || '';
-          setCurrentUser(displayName, session.user.id);
+      async (_event, newSession) => {
+        setSession(newSession);
+        if (newSession?.user) {
+          const displayName = await resolveDisplayName(
+            newSession.user.id,
+            newSession.user.user_metadata,
+            newSession.user.email
+          );
+          setCurrentUser(displayName, newSession.user.id);
         }
         setAuthLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data: profile }) => {
-            const displayName = profile?.display_name || session.user.user_metadata?.display_name || session.user.email || '';
-            setCurrentUser(displayName, session.user.id);
-          });
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+      setSession(existingSession);
+      if (existingSession?.user) {
+        const displayName = await resolveDisplayName(
+          existingSession.user.id,
+          existingSession.user.user_metadata,
+          existingSession.user.email
+        );
+        setCurrentUser(displayName, existingSession.user.id);
       }
       setAuthLoading(false);
     });
