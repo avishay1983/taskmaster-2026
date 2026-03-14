@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { PushDebugPanel } from './PushDebugPanel';
 import { useTaskStore } from '@/lib/task-store';
 import { Workspace } from '@/lib/types';
 import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
