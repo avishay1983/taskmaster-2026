@@ -1,26 +1,50 @@
 // Push notification handler for service worker
 self.addEventListener('push', function(event) {
-  if (!event.data) return;
+  const fallbackData = {
+    title: '📌 עדכון חדש',
+    body: 'יש לך עדכון חדש ב-Family Flow',
+    icon: '/pwa-192x192.png',
+    tag: `notification-${Date.now()}`,
+  };
+
+  let data = fallbackData;
 
   try {
-    const data = event.data.json();
+    if (event.data) {
+      try {
+        data = event.data.json();
+      } catch {
+        data = { ...fallbackData, body: event.data.text() || fallbackData.body };
+      }
+    }
+
     const options = {
-      body: data.body || '',
-      icon: data.icon || '/pwa-192x192.png',
+      body: data.body || fallbackData.body,
+      icon: data.icon || fallbackData.icon,
       badge: '/pwa-192x192.png',
-      tag: data.tag || 'notification',
+      tag: data.tag || fallbackData.tag,
       dir: 'rtl',
       lang: 'he',
       vibrate: [200, 100, 200],
       requireInteraction: true,
-      data: data,
+      data,
     };
 
     event.waitUntil(
-      self.registration.showNotification(data.title || 'התראה', options)
+      self.registration.showNotification(data.title || fallbackData.title, options)
     );
   } catch (e) {
     console.error('Push event error:', e);
+    event.waitUntil(
+      self.registration.showNotification(fallbackData.title, {
+        body: fallbackData.body,
+        icon: fallbackData.icon,
+        badge: '/pwa-192x192.png',
+        tag: fallbackData.tag,
+        dir: 'rtl',
+        lang: 'he',
+      })
+    );
   }
 });
 
