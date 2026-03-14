@@ -101,17 +101,13 @@ export function usePushSubscription(currentUser: string | null) {
     }
 
     async function saveSubscription(subscription: PushSubscription, userName: string) {
-      try {
-        await callPushFunction('subscribe', {
-          method: 'POST',
-          body: JSON.stringify({
-            subscription: subscription.toJSON(),
-            userName,
-          }),
-        });
-      } catch (err) {
-        console.error('Save subscription error:', err);
-      }
+      await callPushFunction('subscribe', {
+        method: 'POST',
+        body: JSON.stringify({
+          subscription: subscription.toJSON(),
+          userName,
+        }),
+      });
     }
 
     async function triggerCheck() {
