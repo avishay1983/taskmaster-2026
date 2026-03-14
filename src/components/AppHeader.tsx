@@ -51,16 +51,33 @@ export function AppHeader() {
         <SidebarTrigger className="shrink-0" />
 
         {/* Workspace switcher */}
-        {ws && (
+        {(ws || isBacklog) && (
           <DropdownMenu dir="rtl">
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="gap-1.5 rounded-lg font-medium px-2">
-                <WorkspaceIcon icon={ws.icon} />
-                <span className="max-w-[100px] truncate">{ws.name}</span>
+                {isBacklog ? (
+                  <>
+                    <span className="text-sm">📋</span>
+                    <span className="max-w-[100px] truncate">Backlog</span>
+                  </>
+                ) : ws ? (
+                  <>
+                    <WorkspaceIcon icon={ws.icon} />
+                    <span className="max-w-[100px] truncate">{ws.name}</span>
+                  </>
+                ) : null}
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-[180px]">
+              <DropdownMenuItem
+                onClick={() => setActiveWorkspace('backlog')}
+                className={`gap-2 ${isBacklog ? 'bg-accent font-medium' : ''}`}
+              >
+                <span className="text-sm">📋</span>
+                <span>Backlog</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               {workspaces.map((w) => (
                 <DropdownMenuItem
                   key={w.id}
