@@ -15,20 +15,24 @@ import type { Session } from "@supabase/supabase-js";
 
 const queryClient = new QueryClient();
 
-async function resolveDisplayName(userId: string, userMeta: any, email: string | undefined) {
-  // Try to fetch existing profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('display_name')
-    .eq('id', userId)
-    .single();
+async function resolveDisplayName(userId: string, userMeta: any, email: string | undefined): Promise<string> {
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', userId)
+      .single();
 
-  if (profile?.display_name) return profile.display_name;
+    if (profile?.display_name) return profile.display_name;
 
-  // Profile doesn't exist (user created before trigger) - create it
-  const name = userMeta?.display_name || userMeta?.full_name || email || '';
-  await supabase.from('profiles').upsert({ id: userId, display_name: name });
-  return name;
+    // Profile doesn't exist - create it
+    const name = userMeta?.display_name || userMeta?.full_name || email || '';
+    await supabase.from('profiles').upsert({ id: userId, display_name: name });
+    return name;
+  } catch (err) {
+    console.error('resolveDisplayName error:', err);
+    return userMeta?.display_name || userMeta?.full_name || email || '';
+  }
 }
 
 function AppContent() {
@@ -39,36 +43,34 @@ function AppContent() {
   const setCurrentUser = useTaskStore((s) => s.setCurrentUser);
 
   useEffect(() => {
+    // Set up listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
+      (_event, newSession) => {
         setSession(newSession);
-        if (newSession?.user) {
-          const displayName = await resolveDisplayName(
-            newSession.user.id,
-            newSession.user.user_metadata,
-            newSession.user.email
-          );
-          setCurrentUser(displayName, newSession.user.id);
-        }
         setAuthLoading(false);
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
-      setSession(existingSession);
-      if (existingSession?.user) {
-        const displayName = await resolveDisplayName(
-          existingSession.user.id,
-          existingSession.user.user_metadata,
-          existingSession.user.email
-        );
-        setCurrentUser(displayName, existingSession.user.id);
-      }
+    // Then check existing session
+    supabase.auth.getSession().then(({ data: { session: existing } }) => {
+      setSession(existing);
       setAuthLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [setCurrentUser]);
+  }, []);
+
+  // Resolve display name in a separate effect when session changes
+  useEffect(() => {
+    if (!session?.user) return;
+    resolveDisplayName(
+      session.user.id,
+      session.user.user_metadata,
+      session.user.email
+    ).then((name) => {
+      setCurrentUser(name, session.user.id);
+    });
+  }, [session?.user?.id, setCurrentUser]);
 
   useEffect(() => {
     if (session) {
