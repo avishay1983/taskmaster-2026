@@ -425,6 +425,10 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
           t.tags.some((tag) => tag.includes(searchQuery))
       );
   },
-  getUnreadNotificationCount: () =>
-    get().notifications.filter((n) => !n.read).length,
+  getUnreadNotificationCount: () => {
+    const { notifications, tasks, activeWorkspace } = get();
+    if (!activeWorkspace) return notifications.filter((n) => !n.read).length;
+    const wsTaskIds = new Set(tasks.filter(t => t.workspaceId === activeWorkspace).map(t => t.id));
+    return notifications.filter((n) => !n.read && wsTaskIds.has(n.taskId)).length;
+  },
 }));

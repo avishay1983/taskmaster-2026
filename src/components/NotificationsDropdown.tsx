@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function NotificationsDropdown({ onClose }: Props) {
-  const { notifications, markNotificationRead, markAllNotificationsRead, deleteNotification, clearAllNotifications } = useTaskStore();
+  const { notifications, tasks, activeWorkspace, markNotificationRead, markAllNotificationsRead, deleteNotification, clearAllNotifications } = useTaskStore();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -27,8 +27,16 @@ export function NotificationsDropdown({ onClose }: Props) {
     assigned: <UserPlus className="h-4 w-4 text-primary" />,
   };
 
-  const unread = notifications.filter((n) => !n.read);
-  const read = notifications.filter((n) => n.read);
+  // Filter notifications by active workspace
+  const wsTaskIds = activeWorkspace
+    ? new Set(tasks.filter(t => t.workspaceId === activeWorkspace).map(t => t.id))
+    : null;
+  const filtered = wsTaskIds
+    ? notifications.filter(n => wsTaskIds.has(n.taskId))
+    : notifications;
+
+  const unread = filtered.filter((n) => !n.read);
+  const read = filtered.filter((n) => n.read);
 
   return (
     <div
