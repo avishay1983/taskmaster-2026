@@ -111,7 +111,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
       id: crypto.randomUUID(),
       title,
       description,
-      workspaceId,
+      workspaceId: workspaceId || '',
       assigneeIds,
       priority,
       status: 'todo',
@@ -122,6 +122,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
       reminderBefore,
       createdAt: new Date().toISOString(),
       completed: false,
+      isBacklog: isBacklogMode,
     };
     addTask(task);
     resetForm();
