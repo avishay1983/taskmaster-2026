@@ -71,13 +71,14 @@ export function usePushSubscription(currentUser: string | null) {
         }
 
         const appServerKey = urlBase64ToUint8Array(publicKey);
+        const appServerKeyBuffer = new Uint8Array(appServerKey);
         let subscription: PushSubscription;
 
         try {
           // In most browsers this returns existing subscription if compatible
           subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: appServerKey.buffer as ArrayBuffer,
+            applicationServerKey: appServerKeyBuffer,
           });
         } catch (err) {
           // Fallback for browsers that require re-subscribe only on invalid state
@@ -88,7 +89,7 @@ export function usePushSubscription(currentUser: string | null) {
           await existingSub.unsubscribe();
           subscription = await registration.pushManager.subscribe({
             userVisibleOnly: true,
-            applicationServerKey: appServerKey.buffer as ArrayBuffer,
+            applicationServerKey: appServerKeyBuffer,
           });
         }
 

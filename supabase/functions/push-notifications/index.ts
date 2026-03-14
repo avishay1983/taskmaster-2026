@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import * as webpush from "jsr:@negrel/webpush@0.5.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -256,26 +257,44 @@ async function sendPushToSubscriptions(
   let sent = 0;
   const message = JSON.stringify(payload);
 
+  // Convert legacy stored VAPID format to JWK expected by modern Web Push lib
+  const pubBytes = base64UrlToBytes(vapidKeys.publicKey);
+  const x = bytesToBase64Url(pubBytes.slice(1, 33));
+  const y = bytesToBase64Url(pubBytes.slice(33, 65));
+
+  const importedVapidKeys = await webpush.importVapidKeys({
+    publicKey: { kty: 'EC', crv: 'P-256', x, y },
+    privateKey: { kty: 'EC', crv: 'P-256', x, y, d: vapidKeys.privateKey },
+  });
+
+  const appServer = await webpush.ApplicationServer.new({
+    contactInformation: 'mailto:app@family-flow.app',
+    vapidKeys: importedVapidKeys,
+  });
+
   for (const sub of subscriptions) {
     try {
-      const resp = await sendWebPush(
-        sub.endpoint,
-        sub.p256dh,
-        sub.auth,
-        message,
-        vapidKeys.publicKey,
-        vapidKeys.privateKey
-      );
+      const subscriber = appServer.subscribe({
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.p256dh,
+          auth: sub.auth,
+        },
+      });
 
-      if (resp.ok) {
-        sent++;
-      } else if (resp.status === 404 || resp.status === 410) {
+      await subscriber.pushTextMessage(message, {
+        ttl: 86400,
+        urgency: webpush.Urgency.High,
+        topic: payload.tag.slice(0, 32),
+      });
+
+      sent++;
+    } catch (e) {
+      if (e instanceof webpush.PushMessageError && e.isGone()) {
         await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint);
       } else {
-        console.error('Push send failed:', resp.status, await resp.text());
+        console.error('Push send error:', e);
       }
-    } catch (e) {
-      console.error('Push send error:', e);
     }
   }
 
