@@ -168,7 +168,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
               <label className="text-xs font-medium text-muted-foreground mb-1 block">
                 {isBacklogMode ? 'מרחב עבודה (אופציונלי)' : 'מרחב עבודה'}
               </label>
-              <Select value={workspaceId} onValueChange={setWorkspaceId}>
+              <Select value={workspaceId || 'none'} onValueChange={(v) => setWorkspaceId(v === 'none' ? '' : v)}>
                 <SelectTrigger className="h-9"><SelectValue placeholder="ללא מרחב" /></SelectTrigger>
                 <SelectContent>
                   {isBacklogMode && (
