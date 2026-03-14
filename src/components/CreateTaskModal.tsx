@@ -98,7 +98,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
   const handleSubmit = () => {
     if (!title.trim()) return;
 
-    let finalDueDate = dueDate || toLocalDateString(new Date());
+    let finalDueDate = dueDate; // empty string if no date selected
     let finalDueDay: number | undefined;
 
     if (dateMode === 'day' && dueDay !== null) {
