@@ -67,10 +67,11 @@ function getNextDayDate(dayOfWeek: number): string {
 }
 
 export function CreateTaskModal({ open, onClose }: Props) {
-  const { addTask, workspaces } = useTaskStore();
+  const { addTask, workspaces, activeWorkspace } = useTaskStore();
+  const isBacklogMode = activeWorkspace === 'backlog';
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [workspaceId, setWorkspaceId] = useState(workspaces[0]?.id || '');
+  const [workspaceId, setWorkspaceId] = useState(isBacklogMode ? '' : (workspaces[0]?.id || ''));
   const [assigneeIds, setAssigneeIds] = useState<string[]>([]);
   const [priority, setPriority] = useState<Priority>('medium');
   const [dateMode, setDateMode] = useState<DateMode>('day');
@@ -110,7 +111,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
       id: crypto.randomUUID(),
       title,
       description,
-      workspaceId,
+      workspaceId: workspaceId || '',
       assigneeIds,
       priority,
       status: 'todo',
@@ -121,6 +122,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
       reminderBefore,
       createdAt: new Date().toISOString(),
       completed: false,
+      isBacklog: isBacklogMode,
     };
     addTask(task);
     resetForm();
@@ -143,7 +145,7 @@ export function CreateTaskModal({ open, onClose }: Props) {
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="sm:max-w-lg" dir="rtl">
         <DialogHeader>
-          <DialogTitle className="text-lg">משימה חדשה</DialogTitle>
+         <DialogTitle className="text-lg">{isBacklogMode ? 'משימה חדשה ל-Backlog' : 'משימה חדשה'}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-2 max-h-[70vh] overflow-y-auto px-1">
@@ -163,10 +165,15 @@ export function CreateTaskModal({ open, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">מרחב עבודה</label>
-              <Select value={workspaceId} onValueChange={setWorkspaceId}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                {isBacklogMode ? 'מרחב עבודה (אופציונלי)' : 'מרחב עבודה'}
+              </label>
+              <Select value={workspaceId || 'none'} onValueChange={(v) => setWorkspaceId(v === 'none' ? '' : v)}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="ללא מרחב" /></SelectTrigger>
                 <SelectContent>
+                  {isBacklogMode && (
+                    <SelectItem value="none">ללא מרחב</SelectItem>
+                  )}
                   {workspaces.map((ws) => (
                     <SelectItem key={ws.id} value={ws.id}>
                       {ws.icon} {ws.name}
@@ -194,7 +201,9 @@ export function CreateTaskModal({ open, onClose }: Props) {
                   ))}
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground mt-2">אין חברים במרחב זה.</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {isBacklogMode && !workspaceId ? 'בחר מרחב כדי לשייך אחראים' : 'אין חברים במרחב זה.'}
+                </p>
               )}
             </div>
           </div>

@@ -37,7 +37,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, Users, LogOut, Bell, BellOff, BellRing, AlertTriangle, Bug } from 'lucide-react';
+import { Plus, Trash2, Users, LogOut, Bell, BellOff, BellRing, AlertTriangle, Bug, Archive } from 'lucide-react';
 
 const pushStatusConfig: Record<PushStatus, { icon: typeof Bell; label: string; color: string; description: string }> = {
   loading: { icon: Bell, label: 'בודק...', color: 'text-muted-foreground', description: 'בודק מצב התראות...' },
@@ -94,6 +94,8 @@ export function AppSidebar() {
   const getTaskCount = (wsId: string) =>
     tasks.filter((t) => t.workspaceId === wsId && !t.completed).length;
 
+  const backlogCount = tasks.filter((t) => t.isBacklog && !t.completed).length;
+
   const toggleMember = (name: string) => {
     setSelectedMembers(prev => 
       prev.includes(name) ? prev.filter(m => m !== name) : [...prev, name]
@@ -143,6 +145,25 @@ export function AppSidebar() {
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
+                {/* Backlog item */}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => setActiveWorkspace('backlog')}
+                    className={`gap-3 rounded-lg transition-colors ${
+                      activeWorkspace === 'backlog'
+                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                        : 'hover:bg-sidebar-accent/50'
+                    }`}
+                  >
+                    <Archive className="h-4 w-4 shrink-0" />
+                    {!collapsed && (
+                      <div className="flex flex-1 items-center justify-between">
+                        <span>Backlog</span>
+                        <span className="text-xs text-muted-foreground">{backlogCount}</span>
+                      </div>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
 
                 {workspaces.map((ws) => (
                   <SidebarMenuItem key={ws.id}>

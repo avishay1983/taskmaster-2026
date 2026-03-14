@@ -141,12 +141,13 @@ export type Database = {
           due_day: number | null
           due_time: string | null
           id: string
+          is_backlog: boolean
           priority: string
           reminder_before: string | null
           status: string
           tags: string[]
           title: string
-          workspace_id: string
+          workspace_id: string | null
         }
         Insert: {
           assignee_ids?: string[]
@@ -157,12 +158,13 @@ export type Database = {
           due_day?: number | null
           due_time?: string | null
           id?: string
+          is_backlog?: boolean
           priority?: string
           reminder_before?: string | null
           status?: string
           tags?: string[]
           title: string
-          workspace_id: string
+          workspace_id?: string | null
         }
         Update: {
           assignee_ids?: string[]
@@ -173,12 +175,13 @@ export type Database = {
           due_day?: number | null
           due_time?: string | null
           id?: string
+          is_backlog?: boolean
           priority?: string
           reminder_before?: string | null
           status?: string
           tags?: string[]
           title?: string
-          workspace_id?: string
+          workspace_id?: string | null
         }
         Relationships: [
           {

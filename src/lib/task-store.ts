@@ -48,7 +48,7 @@ function dbToTask(row: any): Task {
     id: row.id,
     title: row.title,
     description: row.description,
-    workspaceId: row.workspace_id,
+    workspaceId: row.workspace_id || '',
     assigneeIds: row.assignee_ids || [],
     priority: row.priority,
     status: row.status,
@@ -59,6 +59,7 @@ function dbToTask(row: any): Task {
     reminderBefore: row.reminder_before || undefined,
     createdAt: row.created_at,
     completed: row.completed,
+    isBacklog: row.is_backlog || false,
   };
 }
 
@@ -156,7 +157,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       id: task.id,
       title: task.title,
       description: task.description,
-      workspace_id: task.workspaceId,
+      workspace_id: task.workspaceId || null,
       assignee_ids: task.assigneeIds,
       priority: task.priority,
       status: task.status,
@@ -167,6 +168,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       reminder_before: task.reminderBefore || null,
       completed: task.completed,
       created_at: task.createdAt,
+      is_backlog: task.isBacklog || false,
     }).then(({ error }) => {
       if (error) console.error('Error adding task:', error);
     });
@@ -224,6 +226,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
     if (updates.dueDay !== undefined) dbUpdates.due_day = updates.dueDay;
     if (updates.reminderBefore !== undefined) dbUpdates.reminder_before = updates.reminderBefore;
     if (updates.completed !== undefined) dbUpdates.completed = updates.completed;
+    if (updates.isBacklog !== undefined) dbUpdates.is_backlog = updates.isBacklog;
     if (Object.keys(dbUpdates).length > 0) {
       supabase.from('tasks').update(dbUpdates).eq('id', id).then(({ error }) => {
         if (error) console.error('Error updating task:', error);
@@ -416,7 +419,10 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
   getFilteredTasks: () => {
     const { tasks, activeWorkspace, searchQuery } = get();
     return tasks
-      .filter((t) => !activeWorkspace || t.workspaceId === activeWorkspace)
+      .filter((t) => {
+        if (activeWorkspace === 'backlog') return !!t.isBacklog;
+        return !activeWorkspace || t.workspaceId === activeWorkspace;
+      })
       .filter(
         (t) =>
           !searchQuery ||

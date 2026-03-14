@@ -155,10 +155,15 @@ export function EditTaskModal({ task, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-medium text-muted-foreground mb-1 block">מרחב עבודה</label>
-              <Select value={workspaceId} onValueChange={setWorkspaceId}>
-                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                {task?.isBacklog ? 'מרחב עבודה (אופציונלי)' : 'מרחב עבודה'}
+              </label>
+              <Select value={workspaceId || 'none'} onValueChange={(v) => setWorkspaceId(v === 'none' ? '' : v)}>
+                <SelectTrigger className="h-9"><SelectValue placeholder="ללא מרחב" /></SelectTrigger>
                 <SelectContent>
+                  {task?.isBacklog && (
+                    <SelectItem value="none">ללא מרחב</SelectItem>
+                  )}
                   {workspaces.map((ws) => (
                     <SelectItem key={ws.id} value={ws.id}>
                       {ws.icon} {ws.name}
