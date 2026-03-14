@@ -30,7 +30,6 @@ async function callPushFunction(action: string, init?: RequestInit) {
  * Also periodically triggers the server to check for overdue tasks.
  */
 export function usePushSubscription(currentUser: string | null) {
-  const subscribedRef = useRef(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -41,7 +40,7 @@ export function usePushSubscription(currentUser: string | null) {
 
     async function subscribe() {
       try {
-        // Ensure a service worker is registered before waiting on ready
+        // Ensure a service worker is registered
         let registration = await navigator.serviceWorker.getRegistration();
         if (!registration) {
           registration = await navigator.serviceWorker.register('/sw.js');
@@ -49,25 +48,32 @@ export function usePushSubscription(currentUser: string | null) {
 
         await navigator.serviceWorker.ready;
 
-        // Check if already subscribed
+        // Always unsubscribe first to get a fresh endpoint
         const existingSub = await registration.pushManager.getSubscription();
         if (existingSub) {
+          // Save the current subscription (in case endpoint is still valid)
           await saveSubscription(existingSub, currentUser);
-          subscribedRef.current = true;
-          return;
+          logPushAttempt(true);
+
+          // Also re-subscribe to refresh the endpoint
+          try {
+            await existingSub.unsubscribe();
+          } catch {
+            // Ignore unsubscribe errors
+          }
         }
 
-        // Get VAPID public key from backend function
+        // Get VAPID public key from backend
         const resp = await callPushFunction('vapid-public-key');
         const { publicKey } = await resp.json();
 
         if (cancelled) return;
 
-        // Request permission
+        // Request permission if needed
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') return;
 
-        // Subscribe to push
+        // Subscribe with fresh endpoint
         const appServerKey = urlBase64ToUint8Array(publicKey);
         const subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
@@ -75,7 +81,6 @@ export function usePushSubscription(currentUser: string | null) {
         });
 
         await saveSubscription(subscription, currentUser);
-        subscribedRef.current = true;
         logPushAttempt(true);
       } catch (err) {
         console.error('Push subscription error:', err);
