@@ -1,0 +1,1 @@
+UPDATE tasks SET assignee_ids = ARRAY['אבישי אלנקרי'] WHERE is_backlog = true AND assignee_ids = '{}'
