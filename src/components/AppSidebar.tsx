@@ -225,6 +225,66 @@ export function AppSidebar() {
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
+
+          {/* Groups Section */}
+          {groups.length > 0 && (
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {!collapsed && 'קבוצות'}
+              </SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {groups.map((group) => {
+                    const groupWorkspaces = workspaces.filter(w => w.groupId === group.id);
+                    return (
+                      <SidebarMenuItem key={group.id}>
+                        <div className="px-2 py-1.5">
+                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
+                            <span>{group.icon}</span>
+                            {!collapsed && <span>{group.name}</span>}
+                          </div>
+                          {!collapsed && groupWorkspaces.length > 0 && (
+                            <div className="mr-4 space-y-0.5">
+                              {groupWorkspaces.map((ws) => (
+                                <button
+                                  key={ws.id}
+                                  onClick={() => setActiveWorkspace(ws.id)}
+                                  className={`w-full flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors ${
+                                    activeWorkspace === ws.id
+                                      ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                                      : 'hover:bg-sidebar-accent/50'
+                                  }`}
+                                >
+                                  <IconDisplay icon={ws.icon} className="text-xs" />
+                                  <span className="truncate">{ws.name}</span>
+                                  <span className="text-xs text-muted-foreground mr-auto">{getTaskCount(ws.id)}</span>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          )}
+
+          {/* Create Group Button */}
+          {!collapsed && (
+            <div className="px-3 py-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCreateGroup(true)}
+                className="w-full gap-1.5 text-xs"
+              >
+                <FolderPlus className="h-3.5 w-3.5" />
+                קבוצה חדשה
+              </Button>
+            </div>
+          )}
         </SidebarContent>
 
         {currentUser && (
