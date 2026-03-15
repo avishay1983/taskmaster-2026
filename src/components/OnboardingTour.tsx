@@ -304,7 +304,7 @@ export function OnboardingTour() {
       >
         {/* Progress */}
         <div className="flex gap-1 px-3 pt-3">
-          {visibleSteps.map((_, i) => (
+          {readySteps.map((_, i) => (
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-all duration-300 ${
