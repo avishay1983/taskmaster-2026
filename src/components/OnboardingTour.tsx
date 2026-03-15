@@ -186,10 +186,13 @@ export function OnboardingTour() {
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) {
-      const timer = setTimeout(() => setActive(true), 1000);
+      const timer = setTimeout(() => {
+        recomputeVisibleSteps();
+        setActive(true);
+      }, 1000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [recomputeVisibleSteps]);
 
   const updatePosition = useCallback(() => {
     const steps = recomputeVisibleSteps();
