@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Task, Notification, ViewMode, TaskStatus, Workspace } from './types';
+import { Task, Notification, ViewMode, TaskStatus, Workspace, Group } from './types';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TaskStore {
