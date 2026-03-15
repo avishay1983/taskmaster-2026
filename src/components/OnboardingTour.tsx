@@ -257,6 +257,7 @@ export function OnboardingTour() {
   if (!active || readySteps.length === 0) return null;
 
   const step = readySteps[currentStep];
+  if (!step) return null;
   const isLast = currentStep === readySteps.length - 1;
   const PADDING = 6;
 
