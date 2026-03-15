@@ -10,6 +10,7 @@ import { useTaskStore } from "@/lib/task-store";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthScreen } from "@/components/AuthScreen";
 import Index from "./pages/Index";
+import InvitePage from "./pages/InvitePage";
 import NotFound from "./pages/NotFound";
 import type { Session } from "@supabase/supabase-js";
 
