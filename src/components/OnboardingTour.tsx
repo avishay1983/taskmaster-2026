@@ -217,12 +217,20 @@ export function OnboardingTour() {
     };
   }, [active, updatePosition]);
 
-  // Re-measure after tooltip renders
+  // Re-measure after tooltip renders, and open sidebar if needed
   useEffect(() => {
     if (!active) return;
-    const timer = setTimeout(updatePosition, 50);
-    return () => clearTimeout(timer);
-  }, [active, currentStep, updatePosition]);
+    const step = readySteps[currentStep] || TOUR_STEPS[currentStep];
+    if (step?.requiresSidebar) {
+      ensureSidebarOpen(step);
+      // Wait for sidebar animation then recompute
+      const timer = setTimeout(updatePosition, 400);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(updatePosition, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [active, currentStep, updatePosition, ensureSidebarOpen, readySteps]);
 
   const handleClose = useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
@@ -230,21 +238,21 @@ export function OnboardingTour() {
   }, []);
 
   const handleNext = useCallback(() => {
-    if (currentStep < visibleSteps.length - 1) {
+    if (currentStep < readySteps.length - 1) {
       setCurrentStep((s) => s + 1);
     } else {
       handleClose();
     }
-  }, [currentStep, visibleSteps.length, handleClose]);
+  }, [currentStep, readySteps.length, handleClose]);
 
   const handlePrev = useCallback(() => {
     if (currentStep > 0) setCurrentStep((s) => s - 1);
   }, [currentStep]);
 
-  if (!active || visibleSteps.length === 0) return null;
+  if (!active || readySteps.length === 0) return null;
 
-  const step = visibleSteps[currentStep];
-  const isLast = currentStep === visibleSteps.length - 1;
+  const step = readySteps[currentStep];
+  const isLast = currentStep === readySteps.length - 1;
   const PADDING = 6;
 
   return createPortal(
