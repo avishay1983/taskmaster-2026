@@ -152,6 +152,7 @@ export function AppSidebar() {
                 <button
                   onClick={() => setShowAdd(true)}
                   className="p-0.5 rounded hover:bg-sidebar-accent/50 transition-colors"
+                  data-tour="add-workspace"
                 >
                   <Plus className="h-3.5 w-3.5" />
                 </button>
