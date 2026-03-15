@@ -7,6 +7,7 @@ import { ListView } from '@/components/ListView';
 import { KanbanView } from '@/components/KanbanView';
 import { PullToRefresh } from '@/components/PullToRefresh';
 import { WorkspacePickerDialog } from '@/components/WorkspacePickerDialog';
+import { OnboardingTour } from '@/components/OnboardingTour';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
