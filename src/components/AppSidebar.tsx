@@ -5,6 +5,7 @@ import { Workspace } from '@/lib/types';
 import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
 import { InviteLinkDialog } from './InviteLinkDialog';
 import { CreateGroupDialog } from './CreateGroupDialog';
+import { EditGroupDialog } from './EditGroupDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePushStatus, PushStatus } from '@/hooks/usePushStatus';
 import shabbatIcon from '@/assets/shabbat-icon.png';
