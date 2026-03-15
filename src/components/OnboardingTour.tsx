@@ -239,17 +239,23 @@ export function OnboardingTour() {
   // Re-measure after tooltip renders, and open sidebar if needed
   useEffect(() => {
     if (!active) return;
+    restoreTargetVisibility();
     const step = readySteps[currentStep] || TOUR_STEPS[currentStep];
+    if (step) {
+      forceTargetVisible(step.target);
+    }
     if (step?.requiresSidebar) {
       ensureSidebarOpen(step);
-      // Wait for sidebar animation then recompute
-      const timer = setTimeout(updatePosition, 400);
+      const timer = setTimeout(() => {
+        if (step) forceTargetVisible(step.target);
+        updatePosition();
+      }, 400);
       return () => clearTimeout(timer);
     } else {
       const timer = setTimeout(updatePosition, 50);
       return () => clearTimeout(timer);
     }
-  }, [active, currentStep, updatePosition, ensureSidebarOpen, readySteps]);
+  }, [active, currentStep, updatePosition, ensureSidebarOpen, readySteps, forceTargetVisible, restoreTargetVisibility]);
 
   const handleClose = useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
