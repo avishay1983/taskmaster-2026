@@ -9,6 +9,7 @@ import { EditGroupDialog } from './EditGroupDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePushStatus, PushStatus } from '@/hooks/usePushStatus';
 import shabbatIcon from '@/assets/shabbat-icon.png';
+import taskmasterLogo from '@/assets/taskmaster-logo.png';
 import {
   Sidebar,
   SidebarContent,
@@ -137,6 +138,11 @@ export function AppSidebar() {
     <>
       <Sidebar side="right" collapsible="icon" className="border-l border-sidebar-border">
         <SidebarContent className="pt-4">
+          {/* Logo */}
+          <div className={`flex items-center gap-2 px-4 pb-3 border-b border-sidebar-border mb-2 ${collapsed ? 'justify-center px-2' : ''}`}>
+            <img src={taskmasterLogo} alt="TaskMaster" className="w-8 h-8 shrink-0" />
+            {!collapsed && <span className="font-bold text-lg text-foreground tracking-tight">TaskMaster</span>}
+          </div>
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center justify-between">
               {!collapsed && 'מרחבי עבודה'}
