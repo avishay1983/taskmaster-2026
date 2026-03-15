@@ -495,6 +495,9 @@ export function AppSidebar() {
         const g = groups.find(g => g.id === editGroupId);
         return g ? <EditGroupDialog group={g} open={true} onClose={() => setEditGroupId(null)} /> : null;
       })()}
+
+      {/* Settings Dialog */}
+      <SettingsDialog open={showSettings} onClose={() => setShowSettings(false)} />
     </>
   );
 }
