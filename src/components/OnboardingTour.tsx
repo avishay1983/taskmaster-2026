@@ -253,8 +253,9 @@ export function OnboardingTour() {
 
   const handleClose = useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
+    restoreTargetVisibility();
     setActive(false);
-  }, []);
+  }, [restoreTargetVisibility]);
 
   const handleNext = useCallback(() => {
     if (currentStep < readySteps.length - 1) {
