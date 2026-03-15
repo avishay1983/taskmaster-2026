@@ -10,6 +10,7 @@ import { useTaskStore } from "@/lib/task-store";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthScreen } from "@/components/AuthScreen";
 import Index from "./pages/Index";
+import InvitePage from "./pages/InvitePage";
 import NotFound from "./pages/NotFound";
 import type { Session } from "@supabase/supabase-js";
 
@@ -97,6 +98,7 @@ function AppContent() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/invite/:token" element={<InvitePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>

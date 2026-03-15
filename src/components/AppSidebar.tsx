@@ -3,6 +3,7 @@ import { PushDebugPanel } from './PushDebugPanel';
 import { useTaskStore } from '@/lib/task-store';
 import { Workspace } from '@/lib/types';
 import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
+import { InviteLinkDialog } from './InviteLinkDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePushStatus, PushStatus } from '@/hooks/usePushStatus';
 import shabbatIcon from '@/assets/shabbat-icon.png';
@@ -37,7 +38,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Trash2, Users, LogOut, Bell, BellOff, BellRing, AlertTriangle, Bug, Archive } from 'lucide-react';
+import { Plus, Trash2, Users, LogOut, Bell, BellOff, BellRing, AlertTriangle, Bug, Archive, Link2 } from 'lucide-react';
 
 const pushStatusConfig: Record<PushStatus, { icon: typeof Bell; label: string; color: string; description: string }> = {
   loading: { icon: Bell, label: 'בודק...', color: 'text-muted-foreground', description: 'בודק מצב התראות...' },
@@ -70,6 +71,7 @@ export function AppSidebar() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [membersWsId, setMembersWsId] = useState<string | null>(null);
   const [showPushDebug, setShowPushDebug] = useState(false);
+  const [inviteWsId, setInviteWsId] = useState<string | null>(null);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('📁');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -192,6 +194,16 @@ export function AppSidebar() {
                               title="ניהול חברים"
                             >
                               <Users className="h-3 w-3" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setInviteWsId(ws.id);
+                              }}
+                              className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-accent transition-all"
+                              title="הזמנה למרחב"
+                            >
+                              <Link2 className="h-3 w-3" />
                             </button>
                             <button
                               onClick={(e) => {
@@ -373,6 +385,15 @@ export function AppSidebar() {
       )}
 
       <PushDebugPanel open={showPushDebug} onClose={() => setShowPushDebug(false)} />
+
+      {/* Invite Link Dialog */}
+      {inviteWsId && (
+        <InviteLinkDialog
+          workspaceId={inviteWsId}
+          open={!!inviteWsId}
+          onClose={() => setInviteWsId(null)}
+        />
+      )}
     </>
   );
 }
