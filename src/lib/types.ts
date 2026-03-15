@@ -2,12 +2,21 @@ export type Priority = 'high' | 'medium' | 'low';
 export type TaskStatus = 'todo' | 'in_progress' | 'done';
 export type ViewMode = 'list' | 'kanban';
 
+export interface Group {
+  id: string;
+  name: string;
+  icon: string;
+  members: string[];
+  createdBy: string;
+}
+
 export interface Workspace {
   id: string;
   name: string;
   icon: string;
   color: string;
   members: string[]; // member names
+  groupId?: string;
 }
 
 export interface User {

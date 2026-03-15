@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import { Task, Notification, ViewMode, TaskStatus, Workspace } from './types';
+import { Task, Notification, ViewMode, TaskStatus, Workspace, Group } from './types';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TaskStore {
   tasks: Task[];
   notifications: Notification[];
   workspaces: Workspace[];
+  groups: Group[];
   activeWorkspace: string | null;
   viewMode: ViewMode;
   searchQuery: string;
@@ -70,6 +71,17 @@ function dbToWorkspace(row: any): Workspace {
     icon: row.icon,
     color: row.color,
     members: row.members || [],
+    groupId: row.group_id || undefined,
+  };
+}
+
+function dbToGroup(row: any): Group {
+  return {
+    id: row.id,
+    name: row.name,
+    icon: row.icon,
+    members: row.members || [],
+    createdBy: row.created_by,
   };
 }
 
@@ -107,6 +119,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
   tasks: [],
   notifications: [],
   workspaces: [],
+  groups: [],
   activeWorkspace: null,
   viewMode: 'list',
   searchQuery: '',
@@ -126,21 +139,38 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
 
   loadFromDB: async () => {
     set({ isLoading: true });
-    const [tasksRes, workspacesRes, notificationsRes] = await Promise.all([
+    const [tasksRes, workspacesRes, notificationsRes, groupsRes] = await Promise.all([
       supabase.from('tasks').select('*').order('created_at', { ascending: false }),
       supabase.from('workspaces').select('*').order('created_at', { ascending: true }),
       supabase.from('notifications').select('*').order('created_at', { ascending: false }),
+      supabase.from('groups').select('*').order('created_at', { ascending: true }),
     ]);
     const allWorkspaces = (workspacesRes.data || []).map(dbToWorkspace);
+    const allGroups = (groupsRes.data || []).map(dbToGroup);
     const currentUser = get().currentUser;
+    
+    // User sees workspaces where they're a direct member OR where the workspace belongs to a group they're in
+    const userGroupIds = currentUser
+      ? new Set(allGroups.filter(g => g.members.includes(currentUser)).map(g => g.id))
+      : new Set<string>();
+    
     const loadedWorkspaces = currentUser
-      ? allWorkspaces.filter(w => w.members.includes(currentUser))
+      ? allWorkspaces.filter(w => 
+          w.members.includes(currentUser) || 
+          (w.groupId && userGroupIds.has(w.groupId))
+        )
       : allWorkspaces;
+    
+    const loadedGroups = currentUser
+      ? allGroups.filter(g => g.members.includes(currentUser))
+      : allGroups;
+    
     const currentActive = get().activeWorkspace;
-    const stillExists = currentActive && loadedWorkspaces.some(w => w.id === currentActive);
+    const stillExists = currentActive && (currentActive === 'backlog' || loadedWorkspaces.some(w => w.id === currentActive));
     set({
       tasks: (tasksRes.data || []).map(dbToTask),
       workspaces: loadedWorkspaces,
+      groups: loadedGroups,
       notifications: (notificationsRes.data || []).map(dbToNotification),
       activeWorkspace: stillExists ? currentActive : null,
       isLoading: false,
@@ -317,6 +347,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       icon: workspace.icon,
       color: workspace.color,
       members: workspace.members,
+      group_id: workspace.groupId || null,
     }).then(({ error }) => {
       if (error) console.error('Error adding workspace:', error);
     });
