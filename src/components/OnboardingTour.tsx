@@ -160,6 +160,8 @@ export function OnboardingTour() {
   const recomputeVisibleSteps = useCallback(() => {
     const steps = TOUR_STEPS.filter((step) => {
       if (step.fallbackCenter) return true;
+      // Sidebar steps will be made visible when we open the sidebar
+      if (step.requiresSidebar) return true;
       const el = document.querySelector(`[data-tour="${step.target}"]`);
       if (!el) return false;
       const rect = el.getBoundingClientRect();
