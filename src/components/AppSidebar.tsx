@@ -456,6 +456,9 @@ export function AppSidebar() {
           onClose={() => setInviteWsId(null)}
         />
       )}
+
+      {/* Create Group Dialog */}
+      <CreateGroupDialog open={showCreateGroup} onClose={() => setShowCreateGroup(false)} />
     </>
   );
 }
