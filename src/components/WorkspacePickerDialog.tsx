@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useTaskStore } from '@/lib/task-store';
 import {
   Dialog,
@@ -10,6 +11,7 @@ import shabbatIcon from '@/assets/shabbat-icon.png';
 const SPECIAL_ICONS: Record<string, string> = {
   shabbat: shabbatIcon,
 };
+const ONBOARDING_KEY = 'taskmaster_onboarding_done';
 
 function IconDisplay({ icon }: { icon: string }) {
   if (SPECIAL_ICONS[icon]) {
@@ -20,7 +22,17 @@ function IconDisplay({ icon }: { icon: string }) {
 
 export function WorkspacePickerDialog() {
   const { workspaces, activeWorkspace, setActiveWorkspace, isLoading } = useTaskStore();
-  const open = !isLoading && workspaces.length > 0 && !activeWorkspace;
+  const [onboardingDone, setOnboardingDone] = useState(() => localStorage.getItem(ONBOARDING_KEY) === 'true');
+
+  // Listen for onboarding completion
+  useEffect(() => {
+    if (onboardingDone) return;
+    const check = () => setOnboardingDone(localStorage.getItem(ONBOARDING_KEY) === 'true');
+    const interval = setInterval(check, 500);
+    return () => clearInterval(interval);
+  }, [onboardingDone]);
+
+  const open = !isLoading && workspaces.length > 0 && !activeWorkspace && onboardingDone;
 
   return (
     <Dialog open={open}>
