@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import shabbatIcon from '@/assets/shabbat-icon.png';
+import taskmasterLogo from '@/assets/taskmaster-logo.png';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { CreateTaskModal } from './CreateTaskModal';
 
@@ -38,6 +39,7 @@ export function AppHeader() {
     <>
       <header className="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-border bg-background/80 backdrop-blur-sm px-3 md:px-4">
         <SidebarTrigger className="shrink-0" />
+        <img src={taskmasterLogo} alt="TaskMaster" className="w-7 h-7 shrink-0" />
 
         {/* Workspace switcher */}
         {(ws || isBacklog) && (
