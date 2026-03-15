@@ -347,6 +347,7 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
       icon: workspace.icon,
       color: workspace.color,
       members: workspace.members,
+      group_id: workspace.groupId || null,
     }).then(({ error }) => {
       if (error) console.error('Error adding workspace:', error);
     });
