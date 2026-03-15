@@ -71,6 +71,17 @@ function dbToWorkspace(row: any): Workspace {
     icon: row.icon,
     color: row.color,
     members: row.members || [],
+    groupId: row.group_id || undefined,
+  };
+}
+
+function dbToGroup(row: any): Group {
+  return {
+    id: row.id,
+    name: row.name,
+    icon: row.icon,
+    members: row.members || [],
+    createdBy: row.created_by,
   };
 }
 
