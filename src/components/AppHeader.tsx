@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import shabbatIcon from '@/assets/shabbat-icon.png';
+import taskmasterLogo from '@/assets/taskmaster-logo.png';
 import { NotificationsDropdown } from './NotificationsDropdown';
 import { CreateTaskModal } from './CreateTaskModal';
 
