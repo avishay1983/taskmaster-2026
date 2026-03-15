@@ -311,17 +311,33 @@ export function OnboardingTour() {
         />
       </svg>
 
-      {/* Spotlight ring */}
+      {/* Spotlight ring + pulse effect */}
       {spotlightRect && (
-        <div
-          className="absolute rounded-lg ring-2 ring-primary ring-offset-2 ring-offset-transparent pointer-events-none transition-all duration-300"
-          style={{
-            top: spotlightRect.top - PADDING,
-            left: spotlightRect.left - PADDING,
-            width: spotlightRect.width + PADDING * 2,
-            height: spotlightRect.height + PADDING * 2,
-          }}
-        />
+        <>
+          {/* Pulsing glow */}
+          <div
+            className="absolute rounded-xl pointer-events-none animate-pulse"
+            style={{
+              top: spotlightRect.top - PADDING - 4,
+              left: spotlightRect.left - PADDING - 4,
+              width: spotlightRect.width + PADDING * 2 + 8,
+              height: spotlightRect.height + PADDING * 2 + 8,
+              boxShadow: '0 0 20px 6px hsl(var(--primary) / 0.4)',
+              borderRadius: '12px',
+            }}
+          />
+          {/* Solid border ring */}
+          <div
+            className="absolute rounded-xl pointer-events-none transition-all duration-300 border-2 border-primary bg-background/80"
+            style={{
+              top: spotlightRect.top - PADDING,
+              left: spotlightRect.left - PADDING,
+              width: spotlightRect.width + PADDING * 2,
+              height: spotlightRect.height + PADDING * 2,
+              boxShadow: '0 0 0 3px hsl(var(--primary) / 0.25), inset 0 0 8px hsl(var(--primary) / 0.1)',
+            }}
+          />
+        </>
       )}
 
       {/* Tooltip */}
