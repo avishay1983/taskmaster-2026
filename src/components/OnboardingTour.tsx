@@ -192,17 +192,17 @@ export function OnboardingTour() {
   }, []);
 
   const updatePosition = useCallback(() => {
-    const step = visibleSteps[currentStep];
+    const steps = recomputeVisibleSteps();
+    const step = steps[currentStep];
     if (!step) return;
 
     const rect = step.fallbackCenter ? null : getElementRect(step.target);
     setSpotlightRect(rect);
 
-    // Estimate tooltip size if ref isn't mounted yet
     const tooltipW = tooltipRef.current?.offsetWidth || 300;
     const tooltipH = tooltipRef.current?.offsetHeight || 160;
     setTooltipPos(getTooltipPosition(rect, step.placement, tooltipW, tooltipH));
-  }, [currentStep, visibleSteps]);
+  }, [currentStep, recomputeVisibleSteps]);
 
   useEffect(() => {
     if (!active) return;
