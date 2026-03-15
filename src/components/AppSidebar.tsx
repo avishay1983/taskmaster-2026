@@ -169,7 +169,7 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                {workspaces.map((ws) => (
+                {workspaces.filter(ws => !ws.groupId).map((ws) => (
                   <SidebarMenuItem key={ws.id}>
                     <SidebarMenuButton
                       onClick={() => setActiveWorkspace(ws.id)}
