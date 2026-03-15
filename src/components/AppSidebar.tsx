@@ -63,7 +63,7 @@ function IconDisplay({ icon, className = '' }: { icon: string; className?: strin
 }
 
 export function AppSidebar() {
-  const { activeWorkspace, setActiveWorkspace, tasks, workspaces, addWorkspace, deleteWorkspace, currentUser, logout } = useTaskStore();
+  const { activeWorkspace, setActiveWorkspace, tasks, workspaces, groups, addWorkspace, deleteWorkspace, currentUser, logout } = useTaskStore();
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { status: pushStatus, recheck: recheckPush } = usePushStatus();
