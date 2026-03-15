@@ -98,6 +98,7 @@ function AppContent() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/invite/:token" element={<InvitePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
