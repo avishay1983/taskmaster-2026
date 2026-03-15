@@ -127,7 +127,7 @@ export function AppHeader() {
             </Button>
           </div>
 
-          <div className="relative">
+          <div className="relative" data-tour="notifications">
             <Button
               variant="ghost"
               size="icon"
