@@ -330,14 +330,14 @@ export function OnboardingTour() {
           />
           {/* Solid border ring */}
           <div
-            className="absolute rounded-xl pointer-events-none transition-all duration-300 bg-background/90"
+            className="absolute rounded-xl pointer-events-none transition-all duration-300"
             style={{
               top: spotlightRect.top - PADDING,
               left: spotlightRect.left - PADDING,
               width: spotlightRect.width + PADDING * 2,
               height: spotlightRect.height + PADDING * 2,
-              border: '2px solid hsl(45 100% 55%)',
-              boxShadow: '0 0 0 3px hsl(45 100% 55% / 0.2), inset 0 0 12px hsl(45 100% 55% / 0.08)',
+              border: '2.5px solid hsl(45 100% 55%)',
+              boxShadow: '0 0 0 3px hsl(45 100% 55% / 0.25)',
             }}
           />
         </>
