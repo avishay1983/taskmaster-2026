@@ -91,7 +91,7 @@ export function AuthScreen() {
             <Sparkles className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-3xl font-bold text-foreground tracking-tight">
-            Family Flow
+            Taskio
           </h1>
           <p className="text-muted-foreground mt-1.5 text-sm">
             {mode === 'login' ? 'שמחים לראות אותך שוב' : 'בואו נתחיל את המסע'}
