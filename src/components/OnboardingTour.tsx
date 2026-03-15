@@ -339,7 +339,7 @@ export function OnboardingTour() {
           </Button>
 
           <span className="text-[10px] text-muted-foreground">
-            {currentStep + 1} / {visibleSteps.length}
+            {currentStep + 1} / {readySteps.length}
           </span>
 
           <Button
