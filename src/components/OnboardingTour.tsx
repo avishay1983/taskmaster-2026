@@ -27,34 +27,34 @@ const TOUR_STEPS: TourStep[] = [
     target: 'sidebar-trigger',
     title: 'תפריט צדדי 📂',
     description: 'פתח את התפריט הצדדי כדי לראות את מרחבי העבודה, הקבוצות, הגדרות והתראות.',
-    placement: 'left',
+    placement: 'bottom',
   },
   {
     target: 'backlog',
     title: 'Backlog — המשימות האישיות שלך 📋',
     description: 'כאן תוכל לשמור משימות לתכנון עתידי. הבקלוג הוא אישי — כל משתמש רואה רק את המשימות שלו. כשתהיה מוכן, תוכל לקשר אותן למרחב עבודה.',
-    placement: 'left',
+    placement: 'bottom',
     requiresSidebar: true,
   },
   {
     target: 'add-workspace',
     title: 'הקמת מרחב עבודה חדש ➕',
     description: 'לחץ כאן כדי ליצור מרחב עבודה חדש. בחר אייקון, שם, והוסף חברי צוות. כל מרחב הוא פרויקט נפרד עם המשימות שלו.',
-    placement: 'left',
+    placement: 'bottom',
     requiresSidebar: true,
   },
   {
     target: 'invite-link',
     title: 'שליחת קישור הזמנה 🔗',
     description: 'שלח קישור הצטרפות לחברי צוות כדי שיוכלו להיכנס למרחב העבודה שלך. הקישור תקף ל-7 ימים וניתן להגביל את מספר השימושים.',
-    placement: 'left',
+    placement: 'bottom',
     requiresSidebar: true,
   },
   {
     target: 'create-group',
     title: 'יצירת קבוצה 👥',
     description: 'ארגן מרחבי עבודה קשורים יחד בקבוצות. למשל, קבוצה "משפחה" יכולה להכיל מרחבים כמו "נקיונות" ו"קניות". חברי הקבוצה מקבלים גישה אוטומטית לכל המרחבים.',
-    placement: 'left',
+    placement: 'bottom',
     requiresSidebar: true,
   },
   {
@@ -171,16 +171,31 @@ export function OnboardingTour() {
     return steps;
   }, []);
 
+  // Force tour target elements to be visible (e.g. opacity-0 elements)
+  const forceTargetVisible = useCallback((target: string) => {
+    const el = document.querySelector(`[data-tour="${target}"]`) as HTMLElement;
+    if (el) {
+      el.style.opacity = '1';
+      el.dataset.tourForced = 'true';
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, []);
+
+  const restoreTargetVisibility = useCallback(() => {
+    document.querySelectorAll('[data-tour-forced="true"]').forEach((el) => {
+      (el as HTMLElement).style.opacity = '';
+      delete (el as HTMLElement).dataset.tourForced;
+    });
+  }, []);
+
   // Open sidebar if the current step requires it
   const ensureSidebarOpen = useCallback((step: TourStep) => {
     if (!step.requiresSidebar) return;
-    // Check if sidebar is already open by looking for a visible sidebar element
     const sidebarEl = document.querySelector('[data-tour="backlog"]');
     if (sidebarEl) {
       const rect = sidebarEl.getBoundingClientRect();
-      if (rect.width > 0) return; // already visible
+      if (rect.width > 0) return;
     }
-    // Click the sidebar trigger to open it
     const trigger = document.querySelector('[data-tour="sidebar-trigger"]') as HTMLButtonElement;
     if (trigger) trigger.click();
   }, []);
@@ -225,22 +240,29 @@ export function OnboardingTour() {
   // Re-measure after tooltip renders, and open sidebar if needed
   useEffect(() => {
     if (!active) return;
+    restoreTargetVisibility();
     const step = readySteps[currentStep] || TOUR_STEPS[currentStep];
+    if (step) {
+      forceTargetVisible(step.target);
+    }
     if (step?.requiresSidebar) {
       ensureSidebarOpen(step);
-      // Wait for sidebar animation then recompute
-      const timer = setTimeout(updatePosition, 400);
+      const timer = setTimeout(() => {
+        if (step) forceTargetVisible(step.target);
+        updatePosition();
+      }, 400);
       return () => clearTimeout(timer);
     } else {
       const timer = setTimeout(updatePosition, 50);
       return () => clearTimeout(timer);
     }
-  }, [active, currentStep, updatePosition, ensureSidebarOpen, readySteps]);
+  }, [active, currentStep, updatePosition, ensureSidebarOpen, readySteps, forceTargetVisible, restoreTargetVisibility]);
 
   const handleClose = useCallback(() => {
     localStorage.setItem(ONBOARDING_KEY, 'true');
+    restoreTargetVisibility();
     setActive(false);
-  }, []);
+  }, [restoreTargetVisibility]);
 
   const handleNext = useCallback(() => {
     if (currentStep < readySteps.length - 1) {
