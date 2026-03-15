@@ -22,7 +22,7 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Index = () => {
-  const { viewMode, activeWorkspace, workspaces, isLoading, loadFromDB, deleteAllTasks, tasks } = useTaskStore();
+  const { viewMode, activeWorkspace, workspaces, isLoading, loadFromDB, deleteAllTasks, tasks, currentUser } = useTaskStore();
   const ws = activeWorkspace && activeWorkspace !== 'backlog' ? workspaces.find((w) => w.id === activeWorkspace) : null;
   const isBacklog = activeWorkspace === 'backlog';
   const [showDeleteAll, setShowDeleteAll] = useState(false);
@@ -30,7 +30,7 @@ const Index = () => {
   const activeTaskCount = ws
     ? tasks.filter((t) => t.workspaceId === ws.id).length
     : isBacklog
-    ? tasks.filter((t) => t.isBacklog).length
+    ? tasks.filter((t) => t.isBacklog && (!currentUser || t.assigneeIds.includes(currentUser))).length
     : 0;
 
   const handleRefresh = useCallback(async () => {
