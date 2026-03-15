@@ -43,6 +43,7 @@ export function EditGroupDialog({ group, open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [allUsers, setAllUsers] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!open) return;
