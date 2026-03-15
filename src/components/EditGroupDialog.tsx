@@ -93,6 +93,17 @@ export function EditGroupDialog({ group, open, onClose }: Props) {
         await supabase.from('workspaces').update({ group_id: group.id }).eq('id', wsId);
       }
 
+      // Sync group members to all linked workspaces
+      for (const wsId of linkedWorkspaces) {
+        const ws = workspaces.find(w => w.id === wsId);
+        if (ws) {
+          const mergedMembers = Array.from(new Set([...ws.members, ...members]));
+          if (mergedMembers.length !== ws.members.length) {
+            await supabase.from('workspaces').update({ members: mergedMembers }).eq('id', wsId);
+          }
+        }
+      }
+
       await loadFromDB();
       toast.success('הקבוצה עודכנה בהצלחה!');
       onClose();
