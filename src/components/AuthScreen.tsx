@@ -89,8 +89,8 @@ export function AuthScreen() {
       <div className="w-full max-w-md mx-4 relative z-10">
         {/* Logo / Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 mb-4 shadow-lg shadow-primary/5">
-            <Sparkles className="w-8 h-8 text-primary" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4">
+            <img src={taskmasterLogo} alt="TaskMaster" className="w-16 h-16" />
           </div>
           <h1 className="text-3xl font-bold text-foreground tracking-tight">
             TaskMaster
