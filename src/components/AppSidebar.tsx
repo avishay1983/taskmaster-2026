@@ -357,15 +357,26 @@ export function AppSidebar() {
                 {!collapsed && <span>יציאה ({currentUser})</span>}
               </Button>
               {!collapsed && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPushDebug(true)}
-                  className="shrink-0 text-muted-foreground hover:text-foreground"
-                  title="Push Debug"
-                >
-                  <Bug className="h-4 w-4" />
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSettings(true)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                    title="הגדרות"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPushDebug(true)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                    title="Push Debug"
+                  >
+                    <Bug className="h-4 w-4" />
+                  </Button>
+                </>
               )}
             </div>
           </SidebarFooter>
