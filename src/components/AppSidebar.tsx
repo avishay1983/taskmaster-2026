@@ -240,10 +240,19 @@ export function AppSidebar() {
                     const groupWorkspaces = workspaces.filter(w => w.groupId === group.id);
                     return (
                       <SidebarMenuItem key={group.id}>
-                        <div className="px-2 py-1.5">
+                        <div className="px-2 py-1.5 group/grp">
                           <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-1">
                             <span>{group.icon}</span>
-                            {!collapsed && <span>{group.name}</span>}
+                            {!collapsed && <span className="flex-1">{group.name}</span>}
+                            {!collapsed && (
+                              <button
+                                onClick={() => setEditGroupId(group.id)}
+                                className="opacity-0 group-hover/grp:opacity-100 p-0.5 rounded hover:bg-accent transition-all"
+                                title="ערוך קבוצה"
+                              >
+                                <Settings className="h-3 w-3" />
+                              </button>
+                            )}
                           </div>
                           {!collapsed && groupWorkspaces.length > 0 && (
                             <div className="mr-4 space-y-0.5">
