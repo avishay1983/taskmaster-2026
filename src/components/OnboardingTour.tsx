@@ -1,110 +1,256 @@
-import { useState, useEffect } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  Archive, Plus, Search, List, Columns3, Bell, Users, 
-  FolderPlus, ChevronLeft, ChevronRight, Sparkles
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 const ONBOARDING_KEY = 'taskmaster_onboarding_done';
 
-interface Step {
-  icon: React.ReactNode;
+interface TourStep {
+  /** data-tour attribute value to find the element */
+  target: string;
   title: string;
   description: string;
-  color: string;
+  /** Position of tooltip relative to the target */
+  placement: 'top' | 'bottom' | 'left' | 'right';
+  /** If target not found, fallback to center-screen modal */
+  fallbackCenter?: boolean;
 }
 
-const steps: Step[] = [
+const TOUR_STEPS: TourStep[] = [
   {
-    icon: <Sparkles className="h-8 w-8" />,
+    target: '__welcome__',
     title: 'ברוכים הבאים ל-TaskMaster! 🎉',
-    description: 'מערכת ניהול משימות חכמה שתעזור לך לארגן את העבודה שלך ושל הצוות. בוא נכיר את הכלים העיקריים.',
-    color: 'from-primary/20 to-primary/5',
+    description: 'בוא נעשה סיור קצר באפליקציה ונכיר את כל הכלים שלך. זה ייקח פחות מדקה!',
+    placement: 'bottom',
+    fallbackCenter: true,
   },
   {
-    icon: <Archive className="h-8 w-8" />,
-    title: 'Backlog — המשימות האישיות שלך',
-    description: 'כאן תוכל לשמור משימות לתכנון עתידי. הבקלוג הוא אישי — כל משתמש רואה רק את המשימות שלו. כשתהיה מוכן, תוכל לקשר אותן למרחב עבודה.',
-    color: 'from-amber-500/20 to-amber-500/5',
+    target: 'sidebar-trigger',
+    title: 'תפריט צדדי',
+    description: 'פתח את התפריט הצדדי כדי לראות את מרחבי העבודה, הקבוצות, הגדרות התראות, ולהתנתק.',
+    placement: 'left',
   },
   {
-    icon: <Plus className="h-8 w-8" />,
-    title: 'יצירת משימה חדשה',
-    description: 'לחץ על כפתור ה-"+" או "משימה חדשה" כדי ליצור משימה. תוכל להגדיר כותרת, תיאור, עדיפות, תאריך יעד, ולשייך אותה לחברי צוות.',
-    color: 'from-emerald-500/20 to-emerald-500/5',
+    target: 'search',
+    title: 'חיפוש מהיר 🔍',
+    description: 'חפש משימות לפי שם, תיאור או תגיות. התוצאות מתעדכנות בזמן אמת תוך כדי הקלדה.',
+    placement: 'bottom',
   },
   {
-    icon: <div className="flex gap-1"><List className="h-7 w-7" /><Columns3 className="h-7 w-7" /></div>,
-    title: 'תצוגת רשימה וקנבן',
-    description: 'החלף בין תצוגת רשימה לתצוגת קנבן (לוח). בתצוגת קנבן תוכל לגרור משימות בין עמודות הסטטוס: לביצוע, בתהליך, הושלם.',
-    color: 'from-blue-500/20 to-blue-500/5',
+    target: 'add-task',
+    title: 'משימה חדשה ➕',
+    description: 'לחץ כאן כדי ליצור משימה חדשה. תוכל להגדיר כותרת, עדיפות, תאריך יעד, ולשייך אותה לחברי צוות.',
+    placement: 'bottom',
   },
   {
-    icon: <Search className="h-8 w-8" />,
-    title: 'חיפוש מהיר',
-    description: 'השתמש בשדה החיפוש בחלק העליון כדי למצוא משימות לפי שם, תיאור או תגיות. החיפוש פועל בזמן אמת.',
-    color: 'from-violet-500/20 to-violet-500/5',
+    target: 'add-task-mobile',
+    title: 'כפתור הוספה מהיר ➕',
+    description: 'במובייל, לחץ על הכפתור הצף הזה כדי ליצור משימה חדשה במהירות.',
+    placement: 'top',
   },
   {
-    icon: <Users className="h-8 w-8" />,
-    title: 'מרחבי עבודה וחברי צוות',
-    description: 'צור מרחבי עבודה לפרויקטים שונים והזמן חברי צוות. כל חבר יראה את המשימות שמשויכות אליו ויוכל לעדכן את הסטטוס.',
-    color: 'from-pink-500/20 to-pink-500/5',
+    target: 'view-toggle',
+    title: 'תצוגת רשימה / קנבן',
+    description: 'החלף בין תצוגת רשימה לתצוגת קנבן (לוח). בקנבן תוכל לגרור משימות בין עמודות הסטטוס.',
+    placement: 'bottom',
   },
   {
-    icon: <FolderPlus className="h-8 w-8" />,
-    title: 'קבוצות — ארגון מרחבים',
-    description: 'ארגן מרחבי עבודה קשורים יחד בקבוצות. למשל, קבוצה "משפחה" יכולה להכיל מרחבים כמו "נקיונות" ו"קניות".',
-    color: 'from-orange-500/20 to-orange-500/5',
-  },
-  {
-    icon: <Bell className="h-8 w-8" />,
-    title: 'התראות ותזכורות',
-    description: 'קבל התראות כשמשימה מוקצית אליך, כשמועד יעד מתקרב, או כשמשימה מתעדכנת. תוכל להפעיל התראות Push דרך התפריט הצדדי.',
-    color: 'from-red-500/20 to-red-500/5',
+    target: 'notifications',
+    title: 'התראות 🔔',
+    description: 'כאן תראה התראות על משימות שמוקצות אליך, תזכורות ומועדי יעד שמתקרבים.',
+    placement: 'bottom',
   },
 ];
 
+interface SpotlightRect {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+}
+
+function getElementRect(target: string): SpotlightRect | null {
+  const el = document.querySelector(`[data-tour="${target}"]`);
+  if (!el) return null;
+  const rect = el.getBoundingClientRect();
+  return { top: rect.top, left: rect.left, width: rect.width, height: rect.height };
+}
+
+function getTooltipPosition(
+  rect: SpotlightRect | null,
+  placement: TourStep['placement'],
+  tooltipWidth: number,
+  tooltipHeight: number
+) {
+  if (!rect) {
+    // Center on screen
+    return {
+      top: window.innerHeight / 2 - tooltipHeight / 2,
+      left: window.innerWidth / 2 - tooltipWidth / 2,
+    };
+  }
+
+  const OFFSET = 12;
+  const pad = 8;
+  let top = 0;
+  let left = 0;
+
+  switch (placement) {
+    case 'bottom':
+      top = rect.top + rect.height + OFFSET;
+      left = rect.left + rect.width / 2 - tooltipWidth / 2;
+      break;
+    case 'top':
+      top = rect.top - tooltipHeight - OFFSET;
+      left = rect.left + rect.width / 2 - tooltipWidth / 2;
+      break;
+    case 'left':
+      top = rect.top + rect.height / 2 - tooltipHeight / 2;
+      left = rect.left - tooltipWidth - OFFSET;
+      break;
+    case 'right':
+      top = rect.top + rect.height / 2 - tooltipHeight / 2;
+      left = rect.left + rect.width + OFFSET;
+      break;
+  }
+
+  // Clamp to viewport
+  left = Math.max(pad, Math.min(left, window.innerWidth - tooltipWidth - pad));
+  top = Math.max(pad, Math.min(top, window.innerHeight - tooltipHeight - pad));
+
+  return { top, left };
+}
+
 export function OnboardingTour() {
-  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
+  const [spotlightRect, setSpotlightRect] = useState<SpotlightRect | null>(null);
+  const [tooltipPos, setTooltipPos] = useState({ top: 0, left: 0 });
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  // Filter steps based on what's visible (mobile vs desktop)
+  const visibleSteps = TOUR_STEPS.filter((step) => {
+    if (step.fallbackCenter) return true;
+    const el = document.querySelector(`[data-tour="${step.target}"]`);
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+  });
 
   useEffect(() => {
     const done = localStorage.getItem(ONBOARDING_KEY);
     if (!done) {
-      // Small delay so the app renders first
-      const timer = setTimeout(() => setOpen(true), 800);
+      const timer = setTimeout(() => setActive(true), 1000);
       return () => clearTimeout(timer);
     }
   }, []);
 
-  const handleClose = () => {
-    localStorage.setItem(ONBOARDING_KEY, 'true');
-    setOpen(false);
-  };
+  const updatePosition = useCallback(() => {
+    const step = visibleSteps[currentStep];
+    if (!step) return;
 
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+    const rect = step.fallbackCenter ? null : getElementRect(step.target);
+    setSpotlightRect(rect);
+
+    // Estimate tooltip size if ref isn't mounted yet
+    const tooltipW = tooltipRef.current?.offsetWidth || 300;
+    const tooltipH = tooltipRef.current?.offsetHeight || 160;
+    setTooltipPos(getTooltipPosition(rect, step.placement, tooltipW, tooltipH));
+  }, [currentStep, visibleSteps]);
+
+  useEffect(() => {
+    if (!active) return;
+    // Wait a tick for DOM
+    const raf = requestAnimationFrame(() => updatePosition());
+    window.addEventListener('resize', updatePosition);
+    window.addEventListener('scroll', updatePosition, true);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('scroll', updatePosition, true);
+    };
+  }, [active, updatePosition]);
+
+  // Re-measure after tooltip renders
+  useEffect(() => {
+    if (!active) return;
+    const timer = setTimeout(updatePosition, 50);
+    return () => clearTimeout(timer);
+  }, [active, currentStep, updatePosition]);
+
+  const handleClose = useCallback(() => {
+    localStorage.setItem(ONBOARDING_KEY, 'true');
+    setActive(false);
+  }, []);
+
+  const handleNext = useCallback(() => {
+    if (currentStep < visibleSteps.length - 1) {
+      setCurrentStep((s) => s + 1);
     } else {
       handleClose();
     }
-  };
+  }, [currentStep, visibleSteps.length, handleClose]);
 
-  const handlePrev = () => {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
-  };
+  const handlePrev = useCallback(() => {
+    if (currentStep > 0) setCurrentStep((s) => s - 1);
+  }, [currentStep]);
 
-  const step = steps[currentStep];
-  const isLast = currentStep === steps.length - 1;
+  if (!active || visibleSteps.length === 0) return null;
 
-  return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
-      <DialogContent className="sm:max-w-md p-0 overflow-hidden gap-0 border-0" dir="rtl">
-        {/* Progress bar */}
-        <div className="flex gap-1 px-4 pt-4">
-          {steps.map((_, i) => (
+  const step = visibleSteps[currentStep];
+  const isLast = currentStep === visibleSteps.length - 1;
+  const PADDING = 6;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999]" dir="rtl">
+      {/* Overlay with cutout */}
+      <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: 'none' }}>
+        <defs>
+          <mask id="tour-mask">
+            <rect x="0" y="0" width="100%" height="100%" fill="white" />
+            {spotlightRect && (
+              <rect
+                x={spotlightRect.left - PADDING}
+                y={spotlightRect.top - PADDING}
+                width={spotlightRect.width + PADDING * 2}
+                height={spotlightRect.height + PADDING * 2}
+                rx="8"
+                fill="black"
+              />
+            )}
+          </mask>
+        </defs>
+        <rect
+          x="0" y="0" width="100%" height="100%"
+          fill="hsl(var(--foreground) / 0.6)"
+          mask="url(#tour-mask)"
+          style={{ pointerEvents: 'all' }}
+          onClick={handleClose}
+        />
+      </svg>
+
+      {/* Spotlight ring */}
+      {spotlightRect && (
+        <div
+          className="absolute rounded-lg ring-2 ring-primary ring-offset-2 ring-offset-transparent pointer-events-none transition-all duration-300"
+          style={{
+            top: spotlightRect.top - PADDING,
+            left: spotlightRect.left - PADDING,
+            width: spotlightRect.width + PADDING * 2,
+            height: spotlightRect.height + PADDING * 2,
+          }}
+        />
+      )}
+
+      {/* Tooltip */}
+      <div
+        ref={tooltipRef}
+        className="absolute w-[300px] bg-card border border-border rounded-xl shadow-2xl overflow-hidden transition-all duration-300 ease-out"
+        style={{ top: tooltipPos.top, left: tooltipPos.left, pointerEvents: 'all' }}
+      >
+        {/* Progress */}
+        <div className="flex gap-1 px-3 pt-3">
+          {visibleSteps.map((_, i) => (
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-all duration-300 ${
@@ -115,44 +261,44 @@ export function OnboardingTour() {
         </div>
 
         {/* Content */}
-        <div className="p-6 pt-4 text-center space-y-4">
-          <div className={`mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center text-foreground`}>
-            {step.icon}
+        <div className="p-4 space-y-2">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="text-sm font-bold text-card-foreground leading-tight">{step.title}</h3>
+            <button onClick={handleClose} className="shrink-0 p-0.5 rounded hover:bg-accent transition-colors">
+              <X className="h-3.5 w-3.5 text-muted-foreground" />
+            </button>
           </div>
-          
-          <div className="space-y-2">
-            <h2 className="text-lg font-bold text-foreground">{step.title}</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
-          </div>
-
-          <div className="text-xs text-muted-foreground">
-            {currentStep + 1} / {steps.length}
-          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">{step.description}</p>
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center justify-between p-4 border-t border-border bg-muted/30">
+        {/* Navigation */}
+        <div className="flex items-center justify-between px-3 pb-3">
           <Button
             variant="ghost"
             size="sm"
             onClick={handlePrev}
             disabled={currentStep === 0}
-            className="gap-1"
+            className="h-7 gap-1 text-xs px-2"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3 w-3" />
             הקודם
           </Button>
 
-          <Button variant="ghost" size="sm" onClick={handleClose} className="text-muted-foreground">
-            דלג
-          </Button>
+          <span className="text-[10px] text-muted-foreground">
+            {currentStep + 1} / {visibleSteps.length}
+          </span>
 
-          <Button size="sm" onClick={handleNext} className="gap-1">
-            {isLast ? 'בואו נתחיל! 🚀' : 'הבא'}
-            {!isLast && <ChevronLeft className="h-4 w-4" />}
+          <Button
+            size="sm"
+            onClick={handleNext}
+            className="h-7 gap-1 text-xs px-3"
+          >
+            {isLast ? '🚀 סיום' : 'הבא'}
+            {!isLast && <ChevronLeft className="h-3 w-3" />}
           </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>,
+    document.body
   );
 }
