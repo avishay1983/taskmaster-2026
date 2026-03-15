@@ -154,6 +154,7 @@ export function AppHeader() {
         size="icon"
         onClick={() => setShowCreateTask(true)}
         className="fixed bottom-6 left-6 z-40 h-14 w-14 rounded-full shadow-lg md:hidden"
+        data-tour="add-task-mobile"
       >
         <Plus className="h-6 w-6" />
       </Button>
