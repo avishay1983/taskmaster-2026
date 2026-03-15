@@ -7,7 +7,6 @@ import { Label } from '@/components/ui/label';
 import { LogIn, UserPlus, Mail, Lock, User, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import taskmasterLogo from '@/assets/taskmaster-logo.png';
-import { toast } from 'sonner';
 
 export function AuthScreen() {
   const [mode, setMode] = useState<'login' | 'signup'>('login');
