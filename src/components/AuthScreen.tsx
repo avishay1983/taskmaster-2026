@@ -120,11 +120,6 @@ export function AuthScreen() {
             ))}
           </div>
 
-          <div className="mt-16 pt-8 border-t border-primary-foreground/15">
-            <p className="text-sm text-primary-foreground/50">
-              מאות משפחות כבר משתמשות ב-TaskMaster ✨
-            </p>
-          </div>
         </div>
       </div>
 
