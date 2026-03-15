@@ -6,6 +6,7 @@ import { WorkspaceMembersDialog } from './WorkspaceMembersDialog';
 import { InviteLinkDialog } from './InviteLinkDialog';
 import { CreateGroupDialog } from './CreateGroupDialog';
 import { EditGroupDialog } from './EditGroupDialog';
+import { SettingsDialog } from './SettingsDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { usePushStatus, PushStatus } from '@/hooks/usePushStatus';
 import shabbatIcon from '@/assets/shabbat-icon.png';
@@ -77,6 +78,7 @@ export function AppSidebar() {
   const [inviteWsId, setInviteWsId] = useState<string | null>(null);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [editGroupId, setEditGroupId] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('📁');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
@@ -355,15 +357,26 @@ export function AppSidebar() {
                 {!collapsed && <span>יציאה ({currentUser})</span>}
               </Button>
               {!collapsed && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPushDebug(true)}
-                  className="shrink-0 text-muted-foreground hover:text-foreground"
-                  title="Push Debug"
-                >
-                  <Bug className="h-4 w-4" />
-                </Button>
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSettings(true)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                    title="הגדרות"
+                  >
+                    <Settings className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPushDebug(true)}
+                    className="shrink-0 text-muted-foreground hover:text-foreground"
+                    title="Push Debug"
+                  >
+                    <Bug className="h-4 w-4" />
+                  </Button>
+                </>
               )}
             </div>
           </SidebarFooter>
@@ -482,6 +495,9 @@ export function AppSidebar() {
         const g = groups.find(g => g.id === editGroupId);
         return g ? <EditGroupDialog group={g} open={true} onClose={() => setEditGroupId(null)} /> : null;
       })()}
+
+      {/* Settings Dialog */}
+      <SettingsDialog open={showSettings} onClose={() => setShowSettings(false)} />
     </>
   );
 }

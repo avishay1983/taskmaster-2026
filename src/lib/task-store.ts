@@ -167,12 +167,27 @@ export const useTaskStore = create<TaskStore>()((set, get) => ({
     
     const currentActive = get().activeWorkspace;
     const stillExists = currentActive && (currentActive === 'backlog' || loadedWorkspaces.some(w => w.id === currentActive));
+    
+    // Check auto-select setting
+    let nextActive: string | null = stillExists ? currentActive : null;
+    if (!nextActive && loadedWorkspaces.length > 0) {
+      try {
+        const raw = localStorage.getItem('taskmaster_settings');
+        if (raw) {
+          const settings = JSON.parse(raw);
+          if (settings.autoSelectWorkspace) {
+            nextActive = loadedWorkspaces[0].id;
+          }
+        }
+      } catch {}
+    }
+    
     set({
       tasks: (tasksRes.data || []).map(dbToTask),
       workspaces: loadedWorkspaces,
       groups: loadedGroups,
       notifications: (notificationsRes.data || []).map(dbToNotification),
-      activeWorkspace: stillExists ? currentActive : null,
+      activeWorkspace: nextActive,
       isLoading: false,
     });
   },
