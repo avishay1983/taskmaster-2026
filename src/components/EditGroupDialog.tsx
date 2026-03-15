@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, UserPlus, X, Trash2 } from 'lucide-react';
+import { Copy, Check, Loader2, UserPlus, X, Trash2, Link2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -43,6 +43,7 @@ export function EditGroupDialog({ group, open, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [allUsers, setAllUsers] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -223,6 +224,32 @@ export function EditGroupDialog({ group, open, onClose }: Props) {
                 </div>
               </div>
             )}
+
+            {/* Invite link */}
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1.5 block">לינק הזמנה לקבוצה</label>
+              <div className="flex gap-2">
+                <Input
+                  value={`${window.location.origin}/invite-group/${group.id}`}
+                  readOnly
+                  className="text-xs font-mono h-8"
+                  dir="ltr"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 shrink-0"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(`${window.location.origin}/invite-group/${group.id}`);
+                    setCopied(true);
+                    toast.success('הלינק הועתק!');
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                >
+                  {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+                </Button>
+              </div>
+            </div>
 
             <div className="flex gap-2">
               <Button onClick={handleSave} className="flex-1" disabled={!name.trim() || loading}>
