@@ -73,6 +73,7 @@ export function AppSidebar() {
   const [membersWsId, setMembersWsId] = useState<string | null>(null);
   const [showPushDebug, setShowPushDebug] = useState(false);
   const [inviteWsId, setInviteWsId] = useState<string | null>(null);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [newName, setNewName] = useState('');
   const [newIcon, setNewIcon] = useState('📁');
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
