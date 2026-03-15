@@ -102,6 +102,7 @@ const Index = () => {
         </SidebarInset>
       </div>
       <WorkspacePickerDialog />
+      <OnboardingTour />
 
       {/* Delete All Confirmation */}
       <AlertDialog open={showDeleteAll} onOpenChange={setShowDeleteAll}>
