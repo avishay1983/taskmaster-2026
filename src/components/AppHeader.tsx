@@ -88,6 +88,7 @@ export function AppHeader() {
           size="sm"
           onClick={() => setShowCreateTask(true)}
           className="gap-1.5 rounded-lg font-medium hidden md:flex"
+          data-tour="add-task"
         >
           <Plus className="h-4 w-4" />
           <span>משימה חדשה</span>
